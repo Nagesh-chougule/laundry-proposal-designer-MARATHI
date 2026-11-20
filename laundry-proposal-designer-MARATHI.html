@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laundry System Proposal Designer — Washer-Extractor + Heat-Pump Dryer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Devanagari:wght@400;500;600;700&family=Tiro+Devanagari+Marathi&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F141C;
+  --console:#161E29;
+  --console-2:#1F2937;
+  --console-3:#2A3646;
+  --rule:#33415580;
+  --edge:#334155;
+  --muted:#8FA0B5;
+  --dim:#64748B;
+  --paper:#F2F3EF;
+  --paper-2:#E6E8E1;
+  --paper-ink:#1A1F17;
+  --hp:#16A394;
+  --hp-soft:#2BC3B1;
+  --heat:#E8A33D;
+  --gas:#B45C3E;
+  --alert:#E05C4B;
+  --ui:"IBM Plex Sans","IBM Plex Sans Devanagari",system-ui,sans-serif;
+  --dev:"IBM Plex Sans Devanagari","IBM Plex Sans",system-ui,sans-serif;
+  --doc:"Tiro Devanagari Marathi","IBM Plex Sans Devanagari",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --console-w:432px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:#E2E8F0;
+  font-family:var(--ui);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+
+/* ============ SHELL ============ */
+.shell{display:flex;min-height:100vh;align-items:stretch}
+.console{
+  width:var(--console-w);flex:0 0 var(--console-w);
+  background:var(--console);
+  border-right:1px solid var(--edge);
+  height:100vh;position:sticky;top:0;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:#3A4A5E var(--console);
+}
+.console::-webkit-scrollbar{width:9px}
+.console::-webkit-scrollbar-thumb{background:#3A4A5E;border-radius:9px;border:2px solid var(--console)}
+.stage{flex:1;min-width:0;background:#0B0F15;padding:26px 26px 90px;display:flex;justify-content:center}
+
+/* ============ CONSOLE HEAD ============ */
+.brand{padding:20px 22px 16px;border-bottom:1px solid var(--rule)}
+.brand h1{
+  margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.3;
+}
+.brand .sub{
+  margin-top:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dim);
+}
+.brand .strip{display:flex;gap:3px;margin-top:12px}
+.brand .strip i{height:3px;flex:1;border-radius:2px;background:var(--console-3)}
+.brand .strip i:nth-child(1){background:var(--gas)}
+.brand .strip i:nth-child(2){background:var(--heat)}
+.brand .strip i:nth-child(3){background:var(--hp)}
+
+/* ============ SECTIONS ============ */
+.sec{border-bottom:1px solid var(--rule)}
+.sec>summary{
+  list-style:none;cursor:pointer;padding:13px 22px;
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);user-select:none;
+}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary:hover{color:#CBD5E1;background:#1B2432}
+.sec>summary .n{
+  font-size:9.5px;color:var(--dim);border:1px solid var(--edge);
+  border-radius:3px;padding:1px 5px;letter-spacing:.05em;
+}
+.sec>summary .chev{margin-left:auto;transition:transform .18s ease;opacity:.5}
+.sec[open]>summary .chev{transform:rotate(90deg)}
+.sec[open]>summary{color:#E2E8F0}
+.body{padding:4px 22px 20px}
+
+/* ============ FIELDS ============ */
+.field{margin-bottom:13px}
+.field>label,.lbl{
+  display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;font-weight:500;
+}
+.hint{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.45}
+input[type=text],input[type=number],select,textarea{
+  width:100%;background:var(--ink);border:1px solid var(--edge);border-radius:6px;
+  padding:8px 10px;color:#F1F5F9;outline:none;transition:border-color .15s,box-shadow .15s;
+}
+input[type=number]{font-family:var(--mono)}
+input:focus,select:focus,textarea:focus{border-color:var(--hp);box-shadow:0 0 0 3px #16A39426}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%238FA0B5' stroke-width='1.6'><path d='M1 1l4 4 4-4'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.unit{position:relative}
+.unit .u{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:10px;color:var(--dim);pointer-events:none;
+}
+.unit input{padding-right:44px}
+
+/* segmented */
+.seg{display:flex;background:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:2px;gap:2px}
+.seg button{
+  flex:1;background:none;border:0;border-radius:4px;padding:6px 4px;cursor:pointer;
+  font-size:11.5px;color:var(--muted);transition:background .15s,color .15s;
+}
+.seg button[aria-pressed=true]{background:var(--console-3);color:#F1F5F9;font-weight:600}
+.seg button:hover:not([aria-pressed=true]){color:#CBD5E1}
+
+/* switch */
+.sw{display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 0;user-select:none}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw .track{
+  width:36px;height:20px;border-radius:20px;background:var(--console-3);
+  border:1px solid var(--edge);position:relative;transition:background .18s;flex:0 0 auto;
+}
+.sw .track::after{
+  content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+  background:var(--muted);transition:transform .18s,background .18s;
+}
+.sw input:checked+.track{background:#16A39440;border-color:var(--hp)}
+.sw input:checked+.track::after{transform:translateX(16px);background:var(--hp-soft)}
+.sw input:focus-visible+.track{box-shadow:0 0 0 3px #16A39433}
+.sw span.t{font-size:12px;color:#CBD5E1}
+
+/* ============ SIGNATURE: ENERGY LEDGER ============ */
+.ledger{padding:16px 22px 20px;background:linear-gradient(180deg,#131B25,#161E29);border-bottom:1px solid var(--rule)}
+.ledger h2{
+  margin:0 0 3px;font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;
+}
+.ledger .cap{font-size:10.5px;color:var(--dim);margin-bottom:14px}
+.bar{margin-bottom:11px}
+.bar .top{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+.bar .nm{font-size:11.5px;color:#CBD5E1;flex:1}
+.bar .vl{font-family:var(--mono);font-size:12.5px;font-weight:500}
+.bar .tr{height:7px;background:#0F1620;border-radius:4px;overflow:hidden}
+.bar .fl{height:100%;border-radius:4px;width:0;transition:width .55s cubic-bezier(.22,1,.36,1)}
+.bar.e .fl{background:linear-gradient(90deg,#E8A33D99,var(--heat))}
+.bar.e .vl{color:var(--heat)}
+.bar.g .fl{background:linear-gradient(90deg,#B45C3E99,var(--gas))}
+.bar.g .vl{color:var(--gas)}
+.bar.h .fl{background:linear-gradient(90deg,#16A39499,var(--hp-soft))}
+.bar.h .vl{color:var(--hp-soft)}
+.bar .sv{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px}
+
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.rd{background:#0F1620;border:1px solid var(--edge);border-radius:7px;padding:10px 11px}
+.rd .k{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.rd .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px;color:#F1F5F9;line-height:1.1}
+.rd .v small{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
+.rd.acc .v{color:var(--hp-soft)}
+
+/* spec summary chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+.chip{
+  font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;
+  background:#0F1620;border:1px solid var(--edge);color:var(--muted);
+}
+.chip b{color:#E2E8F0;font-weight:600}
+.chip.ok{border-color:#16A39466;color:var(--hp-soft)}
+.chip.warn{border-color:#E8A33D66;color:var(--heat)}
+
+/* ============ ACTIONS ============ */
+.actions{padding:16px 22px 26px;display:grid;gap:8px}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid var(--edge);background:var(--console-2);color:#E2E8F0;
+  padding:10px 12px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:500;
+  transition:background .15s,border-color .15s,transform .06s;
+}
+.btn:hover{background:var(--console-3);border-color:#475569}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--hp);border-color:var(--hp);color:#04211E;font-weight:600}
+.btn.primary:hover{background:var(--hp-soft);border-color:var(--hp-soft)}
+.btn.ghost{background:none}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.foot{padding:0 22px 30px;font-size:10.5px;color:var(--dim);line-height:1.5}
+
+/* ============ PAPER ============ */
+.paper-wrap{width:100%;max-width:860px}
+.paper-bar{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;
+}
+.paper-bar .t{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+}
+.paper-bar .spacer{flex:1}
+.tabs{display:flex;gap:2px;background:var(--console);border:1px solid var(--edge);border-radius:7px;padding:2px}
+.tabs button{
+  background:none;border:0;border-radius:5px;padding:6px 12px;cursor:pointer;
+  font-size:11.5px;color:var(--muted);
+}
+.tabs button[aria-selected=true]{background:var(--console-3);color:#F1F5F9;font-weight:600}
+.paper{
+  background:var(--paper);color:var(--paper-ink);
+  border-radius:3px;padding:52px 58px 64px;
+  box-shadow:0 1px 0 #ffffff26 inset,0 24px 60px #00000066;
+  font-family:var(--doc);font-size:14.4px;line-height:1.72;
+}
+.paper.en{font-family:"IBM Plex Sans",Georgia,serif;font-size:14px}
+.paper h1{
+  font-family:var(--dev);font-size:21px;line-height:1.35;margin:0 0 4px;font-weight:700;letter-spacing:-.01em;
+}
+.paper .h1sub{font-family:var(--dev);font-size:14px;color:#4A5346;margin-bottom:2px;font-weight:500}
+.paper .docmeta{
+  display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;
+  letter-spacing:.06em;text-transform:uppercase;color:#6B7466;
+  border-top:1px solid #C9CDC1;border-bottom:1px solid #C9CDC1;padding:7px 0;margin:18px 0 26px;
+}
+.paper h2{
+  font-family:var(--dev);font-size:15px;font-weight:700;margin:30px 0 9px;
+  padding-bottom:5px;border-bottom:1.5px solid #1A1F17;display:flex;gap:9px;align-items:baseline;
+}
+.paper h2 .no{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--hp);flex:0 0 auto}
+.paper h3{font-family:var(--dev);font-size:13px;font-weight:700;margin:18px 0 6px}
+.paper p{margin:0 0 11px;text-align:justify}
+.paper ul{margin:0 0 12px;padding-left:19px}
+.paper li{margin-bottom:4px}
+.paper strong{font-weight:700}
+.paper .num{font-family:var(--mono);font-weight:500;font-size:.94em}
+.paper table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-family:var(--dev);font-size:12.3px}
+.paper th,.paper td{border:1px solid #B8BDB0;padding:6px 9px;text-align:left;vertical-align:top}
+.paper th{background:#E2E5DC;font-weight:700;font-size:11.5px}
+.paper td.n,.paper th.n{text-align:right;font-family:var(--mono);font-size:11.6px;white-space:nowrap}
+.paper tr.total td{background:#E2E5DC;font-weight:700}
+.paper .callout{
+  background:#E7EBE3;border-left:3px solid var(--hp);padding:12px 15px;margin:14px 0;font-size:13px;
+}
+.paper .callout .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#5A6355;display:block;margin-bottom:4px}
+.paper .flow{
+  font-family:var(--mono);font-size:11.5px;line-height:2.05;background:#E9ECE4;
+  border:1px solid #C9CDC1;padding:14px 18px;margin:12px 0 16px;
+}
+.paper .flow b{font-family:var(--dev);font-size:12.5px}
+.paper .sign{margin-top:44px;display:flex;justify-content:flex-end}
+.paper .sign div{text-align:center;font-size:12.5px;line-height:1.9}
+.paper .sign .line{border-top:1px solid #1A1F17;width:210px;margin-bottom:5px}
+.paper .fine{font-size:11.5px;color:#5A6355;line-height:1.6}
+
+/* ============ MOBILE ============ */
+.mobile-tabs{display:none}
+@media (max-width:1080px){
+  .shell{flex-direction:column}
+  .console{width:100%;flex:none;height:auto;position:static;border-right:0;border-bottom:1px solid var(--edge)}
+  .stage{padding:16px 12px 80px}
+  .paper{padding:30px 22px 40px;font-size:14px}
+  .mobile-tabs{display:flex;position:sticky;top:0;z-index:20;background:var(--ink);padding:8px 12px;gap:2px;border-bottom:1px solid var(--edge)}
+  .mobile-tabs button{flex:1;background:var(--console);border:1px solid var(--edge);border-radius:6px;padding:9px;cursor:pointer;font-size:12.5px;color:var(--muted)}
+  .mobile-tabs button[aria-pressed=true]{background:var(--console-3);color:#fff;font-weight:600}
+  body.view-doc .console{display:none}
+  body.view-cfg .stage{display:none}
+}
+
+/* ============ PRINT ============ */
+@media print{
+  @page{size:A4;margin:16mm 15mm}
+  body{background:#fff}
+  .console,.paper-bar,.mobile-tabs,.noprint{display:none !important}
+  .shell{display:block}
+  /* the mobile view-switch rules must never hide the document when printing */
+  .stage,body.view-cfg .stage,body.view-doc .stage{padding:0;background:#fff;display:block !important}
+  body.view-cfg .console,body.view-doc .console{display:none !important}
+  .paper-wrap{max-width:none}
+  .paper{box-shadow:none;padding:0;background:#fff;font-size:11.2pt;line-height:1.6}
+  .paper h2{page-break-after:avoid;font-size:12.5pt;margin-top:16pt}
+  .paper table{page-break-inside:avoid;font-size:9.6pt}
+  .paper .flow,.paper .callout{page-break-inside:avoid}
+  .pagebreak{page-break-before:always}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+:focus-visible{outline:2px solid var(--hp);outline-offset:2px}
+</style>
+</head>
+<body class="view-cfg">
+<div class="mobile-tabs">
+  <button id="mtCfg" aria-pressed="true">कॉन्फिगरेशन</button>
+  <button id="mtDoc" aria-pressed="false">प्रस्ताव</button>
+</div>
+<div class="shell">
+<aside class="console" id="console"></aside>
+<main class="stage">
+  <div class="paper-wrap">
+    <div class="paper-bar noprint">
+      <span class="t">Live proposal</span>
+      <div class="tabs" role="tablist" id="langTabs">
+        <button role="tab" aria-selected="true" data-lang="mr">मराठी</button>
+        <button role="tab" aria-selected="false" data-lang="en">English</button>
+      </div>
+      <span class="spacer"></span>
+      <div class="tabs" role="tablist" id="viewTabs">
+        <button role="tab" aria-selected="true" data-view="proposal">Proposal</button>
+        <button role="tab" aria-selected="false" data-view="boq">BOQ + Costing</button>
+        <button role="tab" aria-selected="false" data-view="tech">Tender specs</button>
+      </div>
+    </div>
+    <article class="paper" id="paper"></article>
+  </div>
+</main>
+</div>
+<script>
+/* ============================================================
+   LAUNDRY SYSTEM PROPOSAL DESIGNER
+   Industrial Washer-Extractor + Heat-Pump Tumble Dryer
+   ============================================================ */
+
+/* ---------- application presets ---------- */
+const APPS = {
+  hospital:   {mr:"शासकीय रुग्णालय",            en:"Government hospital",        unit:{mr:"बेड",en:"beds"},        size:200, kg:3.5, occ:85, extra:15, cycles:7, days:365, hw:true},
+  medcollege: {mr:"वैद्यकीय महाविद्यालय रुग्णालय", en:"Medical college hospital",   unit:{mr:"बेड",en:"beds"},        size:500, kg:4.0, occ:90, extra:20, cycles:7, days:365, hw:true},
+  hostel:     {mr:"शासकीय वसतिगृह",              en:"Government hostel",          unit:{mr:"विद्यार्थी",en:"residents"}, size:400, kg:1.2, occ:90, extra:0,  cycles:5, days:280, hw:true},
+  ashram:     {mr:"निवासी आश्रमशाळा",            en:"Residential ashram school",  unit:{mr:"विद्यार्थी",en:"students"},  size:300, kg:1.0, occ:95, extra:0,  cycles:5, days:280, hw:true},
+  hotel:      {mr:"हॉटेल / रिसॉर्ट",             en:"Hotel / resort",             unit:{mr:"रूम",en:"rooms"},        size:100, kg:5.0, occ:65, extra:10, cycles:6, days:350, hw:true},
+  oldage:     {mr:"वृद्धाश्रम / केअर होम",        en:"Old-age / care home",        unit:{mr:"निवासी",en:"residents"}, size:120, kg:2.5, occ:90, extra:5,  cycles:5, days:365, hw:true},
+  central:    {mr:"केंद्रीय व्यावसायिक लॉन्ड्री",  en:"Central commercial laundry", unit:{mr:"—",en:"—"},             kg:0,   occ:100,extra:0,  cycles:8, days:312, hw:true, direct:true}
+};
+
+/* ---------- state ---------- */
+const S = {
+  lang:"mr", view:"proposal",
+  app:"hospital",
+  org:"", place:"", addressee:"", refno:"", date:new Date().toISOString().slice(0,10),
+  beds:200, occ:85, kgBed:3.5, extra:15, directKg:800,
+  cycles:7, hours:10, days:365,
+  autoSize:true, cap:50, qty:2,
+  standby:false,
+  /* process */
+  rmrIn:50, rmrOut:2, waterRate:12, hotFrac:40, tCold:25, tHot:60,
+  /* energy */
+  secHP:0.85, secEL:1.60, secGAS:1.45, gasParasitic:0.10, washKWh:0.10,
+  copHP:3.5, copGeyser:1.0, effGas:0.85,
+  tariff:9.0, lpgRate:95, gasType:"lpg", pngRate:58,
+  gridCO2:0.71, lpgCO2:3.0,
+  /* commercial */
+  convFactor:55, hwSystem:true, softener:true, gst:true, gstRate:18,
+  amcPct:5, amcYears:5, contingency:5,
+  /* rate card (₹ lakh) */
+  rc:{
+    washerA:0.20, washerB:2.0,  washerC:0.30, washerD:3.0,
+    dryerA:0.30,  dryerB:1.0,   dryerC:0.45,  dryerD:2.5,
+    dosingL:0.75, dosingH:1.50,
+    panelA:0.025, panelB:0.25,  panelC:0.05,  panelD:0.0,
+    instA:0.025,  instB:0.25,   instC:0.025,  instD:1.25,
+    testL:0.50,   testA:0.0125, testB:0.375,
+    spareA:0.0125,spareB:0.125, spareC:0.025, spareD:0.25,
+    hpwhL:1.60,   hpwhH:2.40,
+    tankL:0.55,   tankH:0.85,
+    softL:0.40,   softH:0.90,
+    miscL:0.30,   miscH:0.60
+  }
+};
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const round=(v,d=0)=>{const m=Math.pow(10,d);return Math.round(v*m)/m;};
+const L = (mr,en) => S.lang==="mr" ? mr : en;
+
+function fmt(v,d=0){
+  if(!isFinite(v)) return "—";
+  return round(v,d).toLocaleString("en-IN",{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function lakh(v,d=2){ return "₹"+fmt(v,d)+" "+L("लाख","lakh"); }
+function rng(a,b,d=2){ return "₹"+fmt(a,d)+"–"+fmt(b,d)+" "+L("लाख","lakh"); }
+function rupee(v){
+  if(v>=10000000) return "₹"+fmt(v/10000000,2)+" "+L("कोटी","cr");
+  if(v>=100000)   return "₹"+fmt(v/100000,2)+" "+L("लाख","lakh");
+  return "₹"+fmt(v,0);
+}
+
+/* ============================================================
+   ENGINE — sizing, energy, costing
+   ============================================================ */
+const CAPS=[15,20,25,30,40,50,60,80,100];
+
+function selectMachines(reqPerSlot){
+  let best=null;
+  CAPS.forEach(cap=>{
+    const n=Math.max(1,Math.ceil(reqPerSlot/cap));
+    if(n>10) return;
+    const util=reqPerSlot/(n*cap);
+    let score = 100 - Math.abs(0.85-util)*120;      // target ~85% utilisation
+    if(cap===30||cap===50) score += 14;             // standard institutional sizes
+    score -= (n-1)*7;                               // prefer fewer machines
+    if(n>6) score -= (n-6)*18;                      // a very large bank needs a re-think
+    if(util>1.001) score -= 200;
+    if(!best||score>best.score) best={cap,n,util,score};
+  });
+  // load beyond ten of the largest machines: fall back to the largest and flag via utilisation
+  if(!best){ const cap=CAPS[CAPS.length-1], n=Math.ceil(reqPerSlot/cap); best={cap,n,util:reqPerSlot/(n*cap),score:0}; }
+  return best;
+}
+
+function compute(){
+  const A=APPS[S.app];
+  /* ---- linen load ---- */
+  const occupied = A.direct ? 0 : S.beds*S.occ/100;
+  const baseLinen = A.direct ? S.directKg : occupied*S.kgBed;
+  const daily = A.direct ? S.directKg : baseLinen*(1+S.extra/100);
+  const annualLinen = daily*S.days;
+
+  /* ---- machines ---- */
+  const reqPerSlot = daily/Math.max(1,S.cycles);
+  let cap,qty,auto=null;
+  if(S.autoSize){ auto=selectMachines(reqPerSlot); cap=auto.cap; qty=auto.n; }
+  else { cap=S.cap; qty=S.qty; }
+  const installedQty = qty + (S.standby?1:0);
+  const capacityDay = cap*qty*S.cycles;
+  const util = capacityDay>0 ? daily/capacityDay : 0;
+  const cycleTime = S.cycles>0 ? (S.hours*60)/S.cycles : 0;
+  const actualCycles = daily>0 ? daily/(cap*qty) : 0;
+
+  /* ---- water removed in dryer ---- */
+  const wPerKg = Math.max(0,(S.rmrIn-S.rmrOut)/100);
+  const waterDay = daily*wPerKg;
+  const waterYr  = waterDay*S.days;
+
+  /* ---- dryer energy (per day) ---- */
+  const dHP   = waterDay*S.secHP;
+  const dEL   = waterDay*S.secEL;
+  const dGASth= waterDay*S.secGAS;
+  const dGASel= waterDay*S.gasParasitic;
+
+  /* ---- hot water ---- */
+  const hwLitres = daily*S.waterRate*(S.hotFrac/100);
+  const hwTherm  = hwLitres*4.186*Math.max(0,S.tHot-S.tCold)/3600;
+  const hwOn     = S.hwSystem ? 1 : 0;   // out of scope for every scenario when not included
+  const hwHP     = hwOn*hwTherm/Math.max(.1,S.copHP);
+  const hwGeyser = hwOn*hwTherm/Math.max(.1,S.copGeyser);
+  const hwGasTh  = hwOn*hwTherm/Math.max(.1,S.effGas);
+
+  /* ---- washer electricity (common) ---- */
+  const washKWh = daily*S.washKWh;
+
+  /* ---- fuel conversion ---- */
+  const gasKWhPerUnit = S.gasType==="lpg" ? 12.8 : 10.9;    // kWh per kg LPG / per SCM PNG
+  const gasRate = S.gasType==="lpg" ? S.lpgRate : S.pngRate;
+  const gasCO2PerUnit = S.gasType==="lpg" ? S.lpgCO2 : 2.0;
+  const gasCost = th => (th/gasKWhPerUnit)*gasRate;
+  const gasUnits= th => th/gasKWhPerUnit;
+
+  /* ---- daily cost by scenario ---- */
+  const T=S.tariff;
+  const sc = {
+    hp:   { kwh: dHP + hwHP + washKWh, fuel:0,
+            cost:(dHP+hwHP+washKWh)*T,
+            co2:(dHP+hwHP+washKWh)*S.gridCO2 },
+    el:   { kwh: dEL + hwGeyser + washKWh, fuel:0,
+            cost:(dEL+hwGeyser+washKWh)*T,
+            co2:(dEL+hwGeyser+washKWh)*S.gridCO2 },
+    gas:  { kwh: dGASel + washKWh, fuel: gasUnits(dGASth+hwGasTh),
+            cost:(dGASel+washKWh)*T + gasCost(dGASth+hwGasTh),
+            co2:(dGASel+washKWh)*S.gridCO2 + gasUnits(dGASth+hwGasTh)*gasCO2PerUnit }
+  };
+  ["hp","el","gas"].forEach(k=>{
+    sc[k].yr      = sc[k].cost*S.days;
+    sc[k].kwhYr   = sc[k].kwh*S.days;
+    sc[k].co2Yr   = sc[k].co2*S.days/1000;              // tonnes
+    sc[k].perKg   = daily>0 ? sc[k].cost/daily : 0;
+  });
+  const saveEl  = sc.el.yr - sc.hp.yr;
+  const saveGas = sc.gas.yr- sc.hp.yr;
+
+  /* ---- capex ---- */
+  const rc=S.rc, n=installedQty;
+  const item=(l,h)=>({l,h});
+  const washer = item(rc.washerA*cap+rc.washerB, rc.washerC*cap+rc.washerD);
+  const dryerHP= item(rc.dryerA*cap+rc.dryerB,  rc.dryerC*cap+rc.dryerD);
+  const dosing = item(rc.dosingL, rc.dosingH);
+  const panel  = item(rc.panelA*cap+rc.panelB,  rc.panelC*cap+rc.panelD);
+  const inst   = item(rc.instA*cap+rc.instB,    rc.instC*cap+rc.instD);
+  const test   = item(rc.testL,                 rc.testA*cap+rc.testB);
+  const spare  = item(rc.spareA*cap+rc.spareB,  rc.spareC*cap+rc.spareD);
+  const testMult = 1+0.35*(n-1);
+
+  const lines=[];
+  const push=(key,mr,en,spec,qtyTxt,l,h)=>lines.push({key,mr,en,spec,qtyTxt,l,h});
+  push("washer", "Industrial Washer-Extractor","Industrial Washer-Extractor", cap+" kg/cycle", n+" "+L("नग","Nos"), washer.l*n, washer.h*n);
+  push("dryer",  "Heat-Pump Tumble Dryer","Heat-Pump Tumble Dryer",         cap+" kg/cycle", n+" "+L("नग","Nos"), dryerHP.l*n, dryerHP.h*n);
+  push("dosing", "Automatic Chemical Dosing System","Automatic Chemical Dosing System", L("किमान ६ channels","Min. 6 channels"), n+" "+L("नग","Nos"), dosing.l*n, dosing.h*n);
+  if(S.hwSystem){
+    const lpd = Math.max(200,Math.ceil(hwLitres/50)*50);
+    const tank= Math.max(500,Math.ceil(hwLitres/Math.max(4,S.hours)*3/100)*100);  // ~3 h peak draw buffer
+    push("hpwh", "Heat-Pump Water Heating System","Heat-Pump Water Heating System", fmt(lpd)+" LPD @ "+S.tHot+"°C", "1 "+L("संच","Set"), rc.hpwhL*lpd/1000, rc.hpwhH*lpd/1000);
+    push("tank", "Insulated Hot-Water Storage Tank","Insulated Hot-Water Storage Tank", fmt(tank)+" L, SS insulated", "1 "+L("नग","No"), rc.tankL*tank/1000, rc.tankH*tank/1000);
+  }
+  if(S.softener) push("soft","Water Softener / Filtration","Water Softener / Filtration", L("क्षमतेनुसार","As per capacity"), "1 "+L("संच","Set"), rc.softL, rc.softH);
+  push("panel", "Electrical & Control Panel","Electrical & Control Panel", "Complete with protection", n+" "+L("संच","Sets"), panel.l*n, panel.h*n);
+  push("inst",  "Installation, Plumbing, Drainage & Commissioning","Installation, Plumbing, Drainage & Commissioning","Complete","1 Lot", inst.l*n*0.9, inst.h*n*0.9);
+  push("misc",  "Linen Trolleys, Sorting Tables & Accessories","Linen Trolleys, Sorting Tables & Accessories", L("आवश्यकतेनुसार","As required"),"1 Lot", rc.miscL*n, rc.miscH*n);
+  push("test",  "Testing, Training & Documentation","Testing, Training & Documentation","Complete","1 Lot", test.l*testMult, test.h*testMult);
+  push("spare", "Initial Critical Spares","Initial Critical Spares", L("२ वर्षांसाठी","For 2 years"),"1 Lot", spare.l*n, spare.h*n);
+
+  let subL=lines.reduce((a,x)=>a+x.l,0), subH=lines.reduce((a,x)=>a+x.h,0);
+  const contL=subL*S.contingency/100, contH=subH*S.contingency/100;
+  let totL=subL+contL, totH=subH+contH;
+  const gstL=S.gst?totL*S.gstRate/100:0, gstH=S.gst?totH*S.gstRate/100:0;
+  const grandL=totL+gstL, grandH=totH+gstH;
+
+  const equipL=lines.filter(x=>x.key!=="inst"&&x.key!=="test"&&x.key!=="spare").reduce((a,x)=>a+x.l,0);
+  const equipH=lines.filter(x=>x.key!=="inst"&&x.key!=="test"&&x.key!=="spare").reduce((a,x)=>a+x.h,0);
+  const amcL=equipL*S.amcPct/100, amcH=equipH*S.amcPct/100;
+
+  /* ---- payback (dryer premium only, conservative) ---- */
+  const convDryer = {l:dryerHP.l*S.convFactor/100, h:dryerHP.h*S.convFactor/100};
+  let premL=(dryerHP.l-convDryer.l)*n, premH=(dryerHP.h-convDryer.h)*n;
+  const hwLine=lines.find(x=>x.key==="hpwh");          // geyser bank taken at 30% of HPWH cost
+  const premHwL=hwLine?hwLine.l*0.70:0, premHwH=hwLine?hwLine.h*0.70:0;
+  premL+=premHwL; premH+=premHwH;
+  const premMid=(premL+premH)/2*100000;
+  const pbEl  = saveEl>0  ? premMid/saveEl  : Infinity;
+  const pbGas = saveGas>0 ? premMid/saveGas : Infinity;
+
+  /* ---- 10-year lifecycle ---- */
+  const life=10;
+  const capMid=(totL+totH)/2*100000;
+  const capConvMid=capMid-premMid;
+  const lc={
+    hp:  capMid       + sc.hp.yr*life,
+    el:  capConvMid   + sc.el.yr*life,
+    gas: capConvMid*1.03 + sc.gas.yr*life
+  };
+
+  /* ---- connected load estimate ---- */
+  const kwWasher=cap*0.16, kwDryer=cap*0.22, kwHW=S.hwSystem?Math.max(2,hwTherm/Math.max(.1,S.copHP)/8):0;
+  const connLoad=(kwWasher+kwDryer)*n + kwHW + 3;
+
+  return {A,daily,annualLinen,occupied,cap,qty,installedQty,capacityDay,util,cycleTime,actualCycles,auto,
+    wPerKg,waterDay,waterYr,dHP,dEL,dGASth,dGASel,hwLitres,hwTherm,hwHP,hwGeyser,hwGasTh,washKWh,
+    sc,saveEl,saveGas,lines,subL,subH,contL,contH,totL,totH,gstL,gstH,grandL,grandH,
+    amcL,amcH,premL,premH,premHwL,premHwH,pbEl,pbGas,lc,connLoad,gasUnitName:S.gasType==="lpg"?"kg LPG":"SCM PNG",
+    dryerHP,convDryer,life};
+}
+
+/* ============================================================
+   CONSOLE UI
+   ============================================================ */
+function num(id,label,unit,step,hint){
+  return `<div class="field"><label for="${id}">${label}</label>
+  <div class="unit"><input type="number" id="${id}" step="${step||1}">${unit?`<span class="u">${unit}</span>`:""}</div>
+  ${hint?`<div class="hint">${hint}</div>`:""}</div>`;
+}
+function sw(id,label){
+  return `<label class="sw"><input type="checkbox" id="${id}"><span class="track"></span><span class="t">${label}</span></label>`;
+}
+
+function buildConsole(){
+  const A=APPS[S.app];
+  const unit=A.unit[S.lang];
+  const capOpts=CAPS.map(c=>`<option value="${c}">${c} kg</option>`).join("");
+  const appOpts=Object.keys(APPS).map(k=>`<option value="${k}">${APPS[k][S.lang]}</option>`).join("");
+
+  $("console").innerHTML=`
+  <div class="brand">
+    <h1>${L("लॉन्ड्री प्रणाली प्रस्ताव डिझायनर","Laundry System Proposal Designer")}</h1>
+    <div class="sub">Washer-Extractor + Heat-Pump Dryer</div>
+    <div class="strip"><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="ledger">
+    <h2>${L("ऊर्जा व खर्च तुलना","Energy & cost ledger")}</h2>
+    <div class="cap" id="ledCap"></div>
+    <div class="bar e"><div class="top"><span class="nm">${L("इलेक्ट्रिक रेझिस्टन्स","Electric resistance")}</span><span class="vl" id="bE"></span></div><div class="tr"><div class="fl" id="fE"></div></div></div>
+    <div class="bar g"><div class="top"><span class="nm">${L("गॅस आधारित","Gas fired")}</span><span class="vl" id="bG"></span></div><div class="tr"><div class="fl" id="fG"></div></div></div>
+    <div class="bar h"><div class="top"><span class="nm">${L("हीट-पंप प्रणाली","Heat-pump system")}</span><span class="vl" id="bH"></span></div><div class="tr"><div class="fl" id="fH"></div></div><div class="sv" id="sH"></div></div>
+    <div class="readout">
+      <div class="rd"><div class="k">${L("दैनिक लिनेन","Daily linen")}</div><div class="v" id="rDaily"></div></div>
+      <div class="rd"><div class="k">${L("प्रस्तावित संच","Proposed set")}</div><div class="v" id="rSet"></div></div>
+      <div class="rd acc"><div class="k">${L("वार्षिक बचत","Annual saving")}</div><div class="v" id="rSave"></div></div>
+      <div class="rd acc"><div class="k">${L("पेबॅक","Payback")}</div><div class="v" id="rPB"></div></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <details class="sec" open><summary><span class="n">01</span>${L("संस्था","Facility")}<span class="chev">›</span></summary>
+    <div class="body">
+      <div class="field"><label for="app">${L("वापर प्रकार","Application type")}</label><select id="app">${appOpts}</select></div>
+      <div class="field"><label for="org">${L("संस्थेचे नाव","Institution name")}</label><input type="text" id="org" placeholder="${L("उदा. जिल्हा शासकीय रुग्णालय","e.g. District Government Hospital")}"></div>
+      <div class="row">
+        <div class="field"><label for="place">${L("ठिकाण","Location")}</label><input type="text" id="place" placeholder="${L("शहर / जिल्हा","City / district")}"></div>
+        <div class="field"><label for="refno">${L("संदर्भ क्र.","Reference no.")}</label><input type="text" id="refno" placeholder="LSP/2026/01"></div>
+      </div>
+      <div class="field"><label for="addressee">${L("प्रति (पदनाम)","Addressee")}</label><input type="text" id="addressee" placeholder="${L("मा. वैद्यकीय अधीक्षक","The Medical Superintendent")}"></div>
+      <div class="field"><label for="date">${L("दिनांक","Date")}</label><input type="text" id="date"></div>
+    </div>
+  </details>
+
+  <details class="sec" open><summary><span class="n">02</span>${L("लिनेन लोड","Linen load")}<span class="chev">›</span></summary>
+    <div class="body" id="loadBody">
+      ${A.direct
+        ? num("directKg",L("दैनिक लिनेन","Daily linen"),"kg/day",10,L("प्रत्यक्ष प्रक्रिया होणारे वजन","Actual weight processed per day"))
+        : `<div class="row">
+             ${num("beds",L("क्षमता","Capacity"),unit,1)}
+             ${num("occ",L("व्याप्ती","Occupancy"),"%",1)}
+           </div>
+           <div class="row">
+             ${num("kgBed",L("लिनेन दर","Linen rate"),"kg/"+L("बेड","bed"),0.1)}
+             ${num("extra",L("OT/ICU अतिरिक्त","OT/ICU extra"),"%",1)}
+           </div>
+           <div class="hint">${L("रुग्णालयासाठी सामान्यतः ३–५ kg प्रति व्याप्त बेड प्रतिदिन. अंतिम आकडा linen audit नंतरच निश्चित करावा.","Typically 3–5 kg per occupied bed per day for hospitals. Confirm with an actual linen audit before finalising.")}</div>`}
+      <div class="row3" style="margin-top:12px">
+        ${num("cycles",L("सायकल/दिवस","Cycles/day"),"",1)}
+        ${num("hours",L("तास","Hours"),"h",1)}
+        ${num("days",L("दिवस/वर्ष","Days/yr"),"",1)}
+      </div>
+    </div>
+  </details>
+
+  <details class="sec" open><summary><span class="n">03</span>${L("मशीन निवड","Machine selection")}<span class="chev">›</span></summary>
+    <div class="body">
+      ${sw("autoSize",L("लोडनुसार आपोआप sizing","Auto-size from load"))}
+      <div class="row" id="manualCap" style="margin-top:8px">
+        <div class="field"><label for="cap">${L("क्षमता/सायकल","Capacity/cycle")}</label><select id="cap">${capOpts}</select></div>
+        ${num("qty",L("संख्या","Quantity"),L("नग","nos"),1)}
+      </div>
+      ${sw("standby",L("एक standby मशीन जोडा (redundancy)","Add one standby machine (redundancy)"))}
+      ${sw("hwSystem",L("हीट-पंप गरम पाणी प्रणाली समाविष्ट","Include heat-pump hot-water system"))}
+      ${sw("softener",L("वॉटर सॉफ्टनर / फिल्ट्रेशन","Water softener / filtration"))}
+    </div>
+  </details>
+
+  <details class="sec"><summary><span class="n">04</span>${L("प्रक्रिया गृहितके","Process assumptions")}<span class="chev">›</span></summary>
+    <div class="body">
+      <div class="row">
+        ${num("rmrIn",L("एक्स्ट्रॅक्शननंतर ओलावा","Moisture after extraction"),"%",1)}
+        ${num("rmrOut",L("अंतिम ओलावा","Final moisture"),"%",0.5)}
+      </div>
+      <div class="hint" style="margin:-4px 0 12px">${L("G-factor ≥250 असलेल्या washer मध्ये साधारण ४५–५५% residual moisture राहते. काढले जाणारे पाणी","With G-factor ≥250 extraction, residual moisture is typically 45–55%. Water removed")}: <b id="wPerKg"></b> ${L("kg पाणी/kg लिनेन","kg water/kg linen")}</div>
+      <div class="row">
+        ${num("waterRate",L("एकूण पाणी","Total water"),"L/kg",0.5)}
+        ${num("hotFrac",L("गरम पाणी हिस्सा","Hot water share"),"%",1)}
+      </div>
+      <div class="row">
+        ${num("tCold",L("इनलेट तापमान","Inlet temp"),"°C",1)}
+        ${num("tHot",L("गरम पाणी तापमान","Hot water temp"),"°C",1)}
+      </div>
+    </div>
+  </details>
+
+  <details class="sec"><summary><span class="n">05</span>${L("ऊर्जा व दर","Energy & tariffs")}<span class="chev">›</span></summary>
+    <div class="body">
+      <div class="field"><label class="lbl">${L("ड्रायर SEC — kWh प्रति kg पाणी","Dryer SEC — kWh per kg water removed")}</label>
+        <div class="row3">
+          ${num("secHP","Heat-pump","",0.05)}
+          ${num("secEL","Electric","",0.05)}
+          ${num("secGAS","Gas (th)","",0.05)}
+        </div>
+        <div class="hint">${L("निविदेत ≤ १.० kWh/kg water removed हे preferred target ठेवावे; bidder ने site performance test मध्ये सिद्ध करावे.","Set ≤1.0 kWh/kg water removed as the preferred tender target, to be proven in a site performance test.")}</div>
+      </div>
+      <div class="row">
+        ${num("copHP",L("HP वॉटर हीटर COP","HP water heater COP"),"",0.1)}
+        ${num("tariff",L("वीज दर","Electricity tariff"),"₹/kWh",0.25)}
+      </div>
+      <div class="field"><label class="lbl">${L("इंधन","Fuel")}</label>
+        <div class="seg" id="gasSeg">
+          <button data-gas="lpg">LPG (₹/kg)</button>
+          <button data-gas="png">PNG (₹/SCM)</button>
+        </div>
+      </div>
+      <div class="row">
+        ${num("lpgRate",L("LPG दर","LPG rate"),"₹/kg",1)}
+        ${num("pngRate",L("PNG दर","PNG rate"),"₹/SCM",1)}
+      </div>
+      <div class="row">
+        ${num("washKWh",L("वॉशर वीज","Washer power"),"kWh/kg",0.01)}
+        ${num("gridCO2",L("ग्रिड CO₂","Grid CO₂"),"kg/kWh",0.01)}
+      </div>
+    </div>
+  </details>
+
+  <details class="sec"><summary><span class="n">06</span>${L("व्यावसायिक बाबी","Commercial")}<span class="chev">›</span></summary>
+    <div class="body">
+      <div class="row">
+        ${num("convFactor",L("पारंपरिक ड्रायर किंमत","Conventional dryer cost"),"% of HP",1,L("पेबॅक गणनेसाठी वापरले जाते","Used for the payback calculation"))}
+        ${num("contingency",L("आकस्मिक निधी","Contingency"),"%",1)}
+      </div>
+      <div class="row">
+        ${num("amcPct",L("वार्षिक AMC","Annual AMC"),"%",0.5)}
+        ${num("gstRate","GST","%",1)}
+      </div>
+      ${sw("gst",L("अंदाजपत्रकात GST समाविष्ट","Include GST in the estimate"))}
+      <div class="hint" style="margin-top:10px">${L("दर हे सन २०२६ च्या प्राथमिक budgetary अंदाजांवर आधारित आहेत. अंतिम निविदेपूर्वी किमान ३ नामांकित उत्पादकांकडून कोटेशन घ्यावे.","Rates are indicative 2026 budgetary estimates. Obtain quotations from at least three reputed manufacturers before finalising the tender.")}</div>
+    </div>
+  </details>
+
+  <div class="actions">
+    <button class="btn primary" id="btnPrint">${L("प्रस्ताव प्रिंट / PDF","Print / save as PDF")}</button>
+    <div class="btn-row">
+      <button class="btn" id="btnWord">${L("Word मध्ये","Word (.doc)")}</button>
+      <button class="btn" id="btnCsv">${L("BOQ (CSV)","BOQ (CSV)")}</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" id="btnSave">${L("प्रोजेक्ट जतन","Save project")}</button>
+      <button class="btn ghost" id="btnLoad">${L("उघडा","Open project")}</button>
+    </div>
+    <input type="file" id="fileIn" accept=".json" hidden>
+    <button class="btn ghost" id="btnReset">${L("मूळ मूल्यांवर परत","Reset to defaults")}</button>
+  </div>
+  <div class="foot">${L("हे साधन प्राथमिक DPR/निविदा नियोजनासाठी अंदाज तयार करते. अंतिम क्षमता, खर्च व ROI प्रत्यक्ष linen audit, स्थानिक दर व OEM performance data वरून निश्चित करावेत.","This tool produces indicative figures for DPR and tender planning. Confirm final capacity, cost and ROI against an actual linen audit, local tariffs and OEM performance data.")}</div>
+  `;
+  wireConsole();
+  syncInputs();
+}
+
+const NUMFIELDS=["beds","occ","kgBed","extra","directKg","cycles","hours","days","qty",
+  "rmrIn","rmrOut","waterRate","hotFrac","tCold","tHot","secHP","secEL","secGAS",
+  "copHP","tariff","lpgRate","pngRate","washKWh","gridCO2","convFactor","contingency","amcPct","gstRate"];
+const TXTFIELDS=["org","place","addressee","refno","date"];
+const SWFIELDS=["autoSize","standby","hwSystem","softener","gst"];
+
+function syncInputs(){
+  NUMFIELDS.forEach(k=>{ const el=$(k); if(el) el.value=S[k]; });
+  TXTFIELDS.forEach(k=>{ const el=$(k); if(el) el.value=S[k]; });
+  SWFIELDS.forEach(k=>{ const el=$(k); if(el) el.checked=S[k]; });
+  if($("app")) $("app").value=S.app;
+  if($("cap")) $("cap").value=S.cap;
+  document.querySelectorAll("#gasSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.gas===S.gasType));
+  const mc=$("manualCap"); if(mc){ mc.style.opacity=S.autoSize?.45:1; mc.style.pointerEvents=S.autoSize?"none":"auto"; }
+}
+
+function wireConsole(){
+  NUMFIELDS.forEach(k=>{ const el=$(k); if(!el) return;
+    el.addEventListener("input",()=>{ const v=parseFloat(el.value); S[k]=isNaN(v)?0:v; render(); });
+  });
+  TXTFIELDS.forEach(k=>{ const el=$(k); if(!el) return;
+    el.addEventListener("input",()=>{ S[k]=el.value; render(); });
+  });
+  SWFIELDS.forEach(k=>{ const el=$(k); if(!el) return;
+    el.addEventListener("change",()=>{ S[k]=el.checked; if(k==="autoSize") syncInputs(); render(); });
+  });
+  if($("app")) $("app").addEventListener("change",e=>{
+    S.app=e.target.value; const A=APPS[S.app];
+    if(!A.direct){ S.kgBed=A.kg; S.occ=A.occ; S.extra=A.extra; if(A.size) S.beds=A.size; }
+    S.cycles=A.cycles; S.days=A.days; S.hwSystem=A.hw;
+    buildConsole(); render();
+  });
+  if($("cap")) $("cap").addEventListener("change",e=>{ S.cap=+e.target.value; render(); });
+  document.querySelectorAll("#gasSeg button").forEach(b=>b.addEventListener("click",()=>{
+    S.gasType=b.dataset.gas; syncInputs(); render();
+  }));
+  $("btnPrint").addEventListener("click",()=>window.print());
+  $("btnWord").addEventListener("click",exportWord);
+  $("btnCsv").addEventListener("click",exportCsv);
+  $("btnSave").addEventListener("click",saveProject);
+  $("btnLoad").addEventListener("click",()=>$("fileIn").click());
+  $("fileIn").addEventListener("change",loadProject);
+  $("btnReset").addEventListener("click",()=>{ if(confirm(L("सर्व मूल्ये मूळ स्थितीत आणायची?","Reset all values to defaults?"))) location.reload(); });
+}
+
+/* ---------- ledger ---------- */
+function updateLedger(c){
+  const max=Math.max(c.sc.el.yr,c.sc.gas.yr,c.sc.hp.yr,1);
+  const set=(bid,fid,v)=>{ $(bid).textContent=rupee(v)+"/"+L("वर्ष","yr"); $(fid).style.width=(v/max*100)+"%"; };
+  set("bE","fE",c.sc.el.yr); set("bG","fG",c.sc.gas.yr); set("bH","fH",c.sc.hp.yr);
+  $("sH").textContent=L("बचत","Saves")+" "+rupee(c.saveEl)+" vs "+L("इलेक्ट्रिक","electric")+" · "+rupee(c.saveGas)+" vs "+L("गॅस","gas");
+  $("ledCap").textContent=L(
+    "वार्षिक ऊर्जा खर्च — धुलाई, ड्रायिंग व गरम पाणी एकत्रित, "+fmt(S.days)+" दिवस",
+    "Annual energy cost — washing, drying and hot water combined, over "+fmt(S.days)+" days");
+  $("rDaily").innerHTML=fmt(c.daily)+"<small>kg/"+L("दिन","day")+"</small>";
+  $("rSet").innerHTML=c.installedQty+" × "+c.cap+"<small>kg</small>";
+  $("rSave").innerHTML=rupee(c.saveEl).replace("₹","₹ ");
+  $("rPB").innerHTML=isFinite(c.pbEl)?fmt(c.pbEl,1)+"<small>"+L("वर्षे","yr")+"</small>":"—";
+  if($("wPerKg")) $("wPerKg").textContent=fmt(c.wPerKg,2);
+
+  const ch=[];
+  ch.push(`<span class="chip">${L("क्षमता","Capacity")} <b>${fmt(c.capacityDay)} kg/${L("दिन","day")}</b></span>`);
+  ch.push(`<span class="chip ${c.util>0.95?"warn":"ok"}">${L("वापर","Utilisation")} <b>${fmt(c.util*100)}%</b></span>`);
+  ch.push(`<span class="chip">${L("सायकल वेळ","Cycle time")} <b>${fmt(c.cycleTime)} min</b></span>`);
+  ch.push(`<span class="chip">${L("जोडलेला भार","Connected load")} <b>~${fmt(c.connLoad)} kW</b></span>`);
+  ch.push(`<span class="chip">${L("प्रकल्प","Project")} <b>${fmt(c.grandL,0)}–${fmt(c.grandH,0)} ${L("लाख","L")}</b></span>`);
+  ch.push(`<span class="chip ok">CO₂ −<b>${fmt(c.sc.el.co2Yr-c.sc.hp.co2Yr,1)} t/${L("वर्ष","yr")}</b></span>`);
+  if(c.util>1) ch.push(`<span class="chip warn">${L("क्षमता अपुरी — सायकल किंवा मशीन वाढवा","Under capacity — add cycles or machines")}</span>`);
+  else if(c.util>0.95 && !S.standby) ch.push(`<span class="chip warn">${L("क्षमता पूर्ण वापरात — standby मशीन विचारात घ्या","Running at full capacity — consider a standby machine")}</span>`);
+  if(c.installedQty===1 && c.daily>200) ch.push(`<span class="chip warn">${L("एकच मशीन — standby विचारात घ्या","Single machine — consider a standby")}</span>`);
+  $("chips").innerHTML=ch.join("");
+}
+
+/* ============================================================
+   DOCUMENT RENDERERS
+   ============================================================ */
+function head(no,mr,en){ return `<h2><span class="no">${no}</span>${L(mr,en)}</h2>`; }
+function docHeader(c){
+  const org=S.org||L("________________________","________________________");
+  const place=S.place?", "+S.place:"";
+  return `
+  <h1>${L("ऊर्जा-कार्यक्षम औद्योगिक लॉन्ड्री प्रणालीचा प्रस्ताव","Proposal for an energy-efficient industrial laundry system")}</h1>
+  <div class="h1sub">Industrial Washer-Extractor + Heat-Pump Tumble Dryer${S.hwSystem?" + Heat-Pump Hot-Water System":""}</div>
+  <div class="h1sub">${org}${place} — ${c.A[S.lang]}</div>
+  <div class="docmeta">
+    <span>${L("संदर्भ","Ref")}: ${S.refno||"—"}</span>
+    <span>${L("दिनांक","Date")}: ${S.date}</span>
+    <span>${L("क्षमता","Capacity")}: ${c.installedQty} × ${c.cap} kg</span>
+    <span>${L("दैनिक लोड","Daily load")}: ${fmt(c.daily)} kg</span>
+  </div>
+  <p><strong>${L("प्रति,","To,")}</strong><br>${S.addressee||L("मा. ____________________","The ____________________")}<br>${org}${place}</p>
+  <p><strong>${L("विषय","Subject")} :</strong> ${L(
+    `${org} येथे ${c.installedQty} × ${c.cap} kg क्षमतेची Industrial Washer-Extractor व Heat-Pump Tumble Dryer आधारित ऊर्जा-कार्यक्षम लॉन्ड्री प्रणाली स्थापित करण्याबाबत प्रस्ताव.`,
+    `Proposal for installing a ${c.installedQty} × ${c.cap} kg energy-efficient laundry system based on industrial washer-extractors and heat-pump tumble dryers at ${org}.`)}</p>`;
+}
+
+function viewProposal(c){
+  const A=c.A, unit=A.unit[S.lang];
+  const eq=c.lines.map((x,i)=>`<tr><td class="n">${i+1}</td><td>${x[S.lang]||x.mr}</td><td>${x.spec}</td><td class="n">${x.qtyTxt}</td></tr>`).join("");
+
+  const cmp=[
+    [L("प्रारंभिक खर्च","Initial cost"),L("कमी","Low"),L("मध्यम","Medium"),L("जास्त","Higher")],
+    [L("चालू ऊर्जा खर्च","Operating energy cost"),L("जास्त","High"),L("मध्यम","Medium"),"<strong>"+L("कमी","Low")+"</strong>"],
+    [L("उष्णता पुनर्प्राप्ती","Heat recovery"),L("नाही","No"),L("मर्यादित","Limited"),"<strong>"+L("होय","Yes")+"</strong>"],
+    [L("ज्वलन (combustion)","Combustion"),L("नाही","No"),L("होय","Yes"),"<strong>"+L("नाही","No")+"</strong>"],
+    [L("गॅस गळतीचा धोका","Gas leakage risk"),L("नाही","No"),L("होय","Yes"),"<strong>"+L("नाही","No")+"</strong>"],
+    [L("तापमान नियंत्रण","Temperature control"),L("चांगले","Good"),L("चांगले","Good"),"<strong>"+L("अत्यंत चांगले","Excellent")+"</strong>"],
+    [L("गॅस पायाभूत सुविधा","Gas infrastructure"),L("आवश्यक नाही","Not required"),L("आवश्यक","Required"),"<strong>"+L("आवश्यक नाही","Not required")+"</strong>"],
+    [L("ऊर्जा कार्यक्षमता","Energy efficiency"),L("कमी–मध्यम","Low–medium"),L("मध्यम","Medium"),"<strong>"+L("उच्च","High")+"</strong>"],
+    [L("देखभाल","Maintenance"),L("हीटर","Heater"),L("बर्नर / गॅस प्रणाली","Burner / gas train"),L("रेफ्रिजरेशन प्रणाली","Refrigeration system")],
+    [L("जीवनचक्र खर्च","Life-cycle cost"),L("जास्त","High"),L("मध्यम","Medium"),"<strong>"+L("सर्वात अनुकूल","Most favourable")+"</strong>"]
+  ].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("");
+
+  const en=[
+    [L("ड्रायिंग","Drying"),fmt(c.dEL,1),fmt(c.dGASel,1)+" + "+fmt(c.dGASth/(S.gasType==="lpg"?12.8:10.9),1)+" "+c.gasUnitName,fmt(c.dHP,1)],
+    [L("गरम पाणी","Hot water"),fmt(c.hwGeyser,1),fmt(c.hwGasTh/(S.gasType==="lpg"?12.8:10.9),1)+" "+c.gasUnitName,fmt(c.hwHP,1)],
+    [L("वॉशर (समान)","Washer (common)"),fmt(c.washKWh,1),fmt(c.washKWh,1),fmt(c.washKWh,1)]
+  ].map(r=>`<tr><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join("");
+
+  const boqRows=c.lines.map((x,i)=>`<tr><td class="n">${i+1}</td><td>${x[S.lang]||x.mr}</td><td class="n">${fmt(x.l,2)}</td><td class="n">${fmt(x.h,2)}</td></tr>`).join("");
+
+  return docHeader(c)+`
+
+${head("1","प्रस्तावना व गरज","Background and need")}
+<p>${L(
+`${S.org||L("संस्थेमध्ये","the institution")} दररोज मोठ्या प्रमाणात बेडशीट, ब्लँकेट, टॉवेल, रुग्णांचे कपडे, गणवेश, पडदे व इतर लिनेन धुणे व वाळविणे आवश्यक असते. पारंपरिक किंवा अर्ध-स्वयंचलित पद्धतीमध्ये मनुष्यबळ, पाणी, वीज/इंधन आणि वेळ यांचा मोठ्या प्रमाणात वापर होतो. स्वच्छता, निर्जंतुकीकरण, जलद प्रक्रिया आणि सातत्यपूर्ण गुणवत्ता यांना विशेष महत्त्व असल्यामुळे programmable industrial washer-extractor, automatic chemical dosing आणि heat-pump based tumble dryer असलेली आधुनिक स्वयंचलित प्रणाली आवश्यक आहे.`,
+`${S.org||"The institution"} washes and dries a large daily volume of bed sheets, blankets, towels, patient clothing, uniforms, curtains and other linen. Manual and semi-automatic methods consume disproportionate labour, water, energy and time. Because hygiene, disinfection, turnaround and consistent quality all matter here, a modern automated system built around a programmable industrial washer-extractor, automatic chemical dosing and a heat-pump tumble dryer is required.`)}</p>
+<p>${L(
+`प्रस्तावित प्रणालीमध्ये washer-extractor मधील high-speed extraction द्वारे लिनेनमधील पाणी यांत्रिकरीत्या काढले जाते आणि उर्वरित ओलावा heat-pump dryer मध्ये कमी तापमानात, उष्णता पुनर्प्राप्ती वापरून काढला जातो. त्यामुळे समान प्रमाणात पाणी काढण्यासाठी लागणारी विद्युत ऊर्जा conventional electric किंवा gas-fired dryer च्या तुलनेत कमी होते.`,
+`In the proposed system, high-speed extraction in the washer removes water mechanically, and the residual moisture is removed in a heat-pump dryer at low temperature using recovered heat. The electrical energy needed to remove the same quantity of water is therefore lower than with a conventional electric or gas-fired dryer.`)}</p>
+
+${head("2","प्रस्तावित प्रणाली","Proposed system")}
+<table><thead><tr><th class="n" style="width:8%">${L("क्र.","Sr.")}</th><th>${L("उपकरण","Equipment")}</th><th>${L("तपशील","Specification")}</th><th class="n">${L("संख्या","Qty")}</th></tr></thead><tbody>${eq}</tbody></table>
+<p>${L("वरील प्रणालीसोबत ५ वर्षांचा comprehensive AMC, operator व maintenance training आणि performance testing समाविष्ट आहे.","The scope also includes a 5-year comprehensive AMC, operator and maintenance training, and performance testing at commissioning.")}</p>
+
+${head("3","लिनेन लोड व क्षमता निश्चिती","Linen load and capacity sizing")}
+${A.direct?`<p>${L("प्रत्यक्ष प्रक्रिया होणारा दैनिक लिनेन लोड","The daily linen load to be processed is")} <strong class="num">${fmt(c.daily)} kg/${L("दिन","day")}</strong> ${L("गृहीत धरण्यात आला आहे.","as declared.")}</p>`
+:`<table><tbody>
+<tr><td>${L("एकूण क्षमता","Total capacity")}</td><td class="n">${fmt(S.beds)} ${unit}</td></tr>
+<tr><td>${L("सरासरी व्याप्ती","Average occupancy")}</td><td class="n">${fmt(S.occ)} %</td></tr>
+<tr><td>${L("व्याप्त","Occupied")} ${unit}</td><td class="n">${fmt(c.occupied)}</td></tr>
+<tr><td>${L("लिनेन निर्मिती","Linen generation")}</td><td class="n">${fmt(S.kgBed,1)} kg/${unit}/${L("दिन","day")}</td></tr>
+<tr><td>${L("OT / ICU / विशेष विभाग अतिरिक्त","OT / ICU / special wards extra")}</td><td class="n">${fmt(S.extra)} %</td></tr>
+<tr class="total"><td>${L("अंदाजे दैनिक लिनेन लोड","Estimated daily linen load")}</td><td class="n">${fmt(c.daily)} kg/${L("दिन","day")}</td></tr>
+</tbody></table>`}
+<p>${L(
+`दररोज ${fmt(S.cycles)} प्रभावी सायकल आणि ${fmt(S.hours)} तास कार्यकाल गृहीत धरल्यास प्रत्येक सायकलमध्ये सुमारे <strong class="num">${fmt(c.daily/Math.max(1,S.cycles))} kg</strong> लिनेन प्रक्रिया करावी लागेल. त्यानुसार <strong>${c.qty} × ${c.cap} kg</strong> ही कार्यरत क्षमता प्रस्तावित आहे${S.standby?" आणि त्यासोबत एक standby मशीन":""}. यामुळे उपलब्ध क्षमता <strong class="num">${fmt(c.capacityDay)} kg/दिन</strong> होते, म्हणजेच <strong class="num">${fmt(c.util*100)}%</strong> वापर.`,
+`Assuming ${fmt(S.cycles)} effective cycles per day over ${fmt(S.hours)} operating hours, each cycle must process about <strong class="num">${fmt(c.daily/Math.max(1,S.cycles))} kg</strong>. A working capacity of <strong>${c.qty} × ${c.cap} kg</strong> is therefore proposed${S.standby?", with one additional standby machine":""}. This gives an available capacity of <strong class="num">${fmt(c.capacityDay)} kg/day</strong>, i.e. <strong class="num">${fmt(c.util*100)}%</strong> utilisation.`)}</p>
+<div class="callout"><span class="k">${L("महत्त्वाचे","Important")}</span>${L(
+"अंतिम क्षमता निश्चित करण्यापूर्वी प्रत्यक्ष linen audit करणे आवश्यक आहे. Bed occupancy, actual linen weight, OT/ICU load, laundry operating hours आणि भविष्यातील विस्तार यांचा विचार करून अंतिम capacity निश्चित करावी.",
+"Carry out an actual linen audit before freezing capacity. Bed occupancy, measured linen weight, OT/ICU load, operating hours and future expansion should all inform the final selection.")}</div>
+
+${head("4","Industrial Washer-Extractor — "+c.cap+" kg","Industrial Washer-Extractor — "+c.cap+" kg")}
+<p>${L(
+`मशीनची rated capacity <strong>${c.cap} kg dry linen per cycle</strong> असावी. मशीन fully automatic, front-loading आणि PLC/HMI-based programmable control असलेली असावी. SS304 wetted parts, VFD-controlled drive, automatic drum reversal, high-speed extraction (≥700 rpm, G-factor ≥250 preferred), automatic imbalance detection, door safety interlock, programmable washing temperature, water level व extraction speed यांची सुविधा असावी. किमान १० programmable washing programmes आणि किमान ६-channel automatic chemical dosing system असावे.`,
+`Rated capacity shall be <strong>${c.cap} kg of dry linen per cycle</strong>. The machine shall be fully automatic, front-loading, with PLC/HMI programmable control, SS304 wetted parts, VFD-controlled drive, automatic drum reversal, high-speed extraction (≥700 rpm, G-factor ≥250 preferred), automatic imbalance detection, door safety interlock and programmable wash temperature, water level and extraction speed. A minimum of 10 programmable wash programmes and a minimum 6-channel automatic chemical dosing system shall be provided.`)}</p>
+<p>${L(
+"High-speed extraction मुळे धुतलेल्या लिनेनमधील residual moisture कमी होते आणि dryer वरील thermal load कमी होऊन drying energy मध्ये थेट बचत होते.",
+"High-speed extraction lowers residual moisture in the washed linen, reducing the thermal load on the dryer and cutting drying energy directly.")}</p>
+
+${head("5","Heat-Pump Tumble Dryer — "+c.cap+" kg","Heat-Pump Tumble Dryer — "+c.cap+" kg")}
+<p>${L(
+`Dryer <strong>closed-loop air-source heat-pump technology</strong> वर आधारित असावा. Drying temperature <strong>${S.tHot>=70?"40–80°C adjustable":"40–80°C adjustable"}</strong>, automatic temperature व humidity/moisture control, automatic drum reversal, मोठा washable lint filter, condensate drainage आणि PLC/touchscreen control असावे. Heat pump प्रणालीमध्ये compressor वापरून moist return air मधील उष्णता evaporator मार्फत पुनर्प्राप्त करून condenser द्वारे पुन्हा drying process मध्ये वापरली जाते.`,
+`The dryer shall use <strong>closed-loop air-source heat-pump technology</strong>, with 40–80°C adjustable drying temperature, automatic temperature and humidity/moisture control, automatic drum reversal, a large washable lint filter, condensate drainage and PLC/touchscreen control. Heat from the moist return air is recovered at the evaporator and returned to the drying air at the condenser.`)}</p>
+<div class="flow"><b>${L("मॉइस्ट हॉट एअर","Moist hot air")}</b> → Evaporator → ${L("आर्द्रता संघनन","Moisture condensation")} → ${L("उष्णता पुनर्प्राप्ती","Heat recovery")} → Condenser → <b>${L("गरम कोरडी हवा","Hot dry air")}</b> → Drum</div>
+<p>${L(
+`निविदेमध्ये केवळ compressor kW न मागता <strong>Specific Energy Consumption (SEC = kWh विद्युत ऊर्जा ÷ kg काढलेले पाणी)</strong> मागणे अधिक योग्य आहे. प्रस्तावित target: <strong>≤ 1.0 kWh/kg of water removed</strong>, standardized test conditions नुसार. या प्रस्तावात <strong class="num">${fmt(S.secHP,2)} kWh/kg</strong> हे गृहीत मूल्य वापरले आहे.`,
+`The tender should ask for <strong>Specific Energy Consumption (SEC = kWh electrical energy ÷ kg of water removed)</strong> rather than only compressor kW. Proposed target: <strong>≤1.0 kWh/kg of water removed</strong> under standardised test conditions. This proposal assumes <strong class="num">${fmt(S.secHP,2)} kWh/kg</strong>.`)}</p>
+
+${S.hwSystem?`${head("6","हीट-पंप गरम पाणी प्रणाली","Heat-pump hot-water system")}
+<p>${L(
+`प्रस्तावित washing schedule नुसार दररोज सुमारे <strong class="num">${fmt(c.hwLitres)} लिटर</strong> गरम पाणी ${S.tHot}°C तापमानास आवश्यक राहील. हे पाणी ${S.tCold}°C वरून ${S.tHot}°C पर्यंत गरम करण्यासाठी सुमारे <strong class="num">${fmt(c.hwTherm,1)} kWh thermal energy</strong> लागते. COP ${fmt(S.copHP,1)} असलेल्या heat pump मध्ये यासाठी सुमारे <strong class="num">${fmt(c.hwHP,1)} kWh</strong> विद्युत ऊर्जा लागेल, तर electric geyser मध्ये जवळपास <strong class="num">${fmt(c.hwGeyser,1)} kWh</strong> लागतील.`,
+`The washing schedule requires about <strong class="num">${fmt(c.hwLitres)} litres</strong> of hot water per day at ${S.tHot}°C. Raising this from ${S.tCold}°C to ${S.tHot}°C needs about <strong class="num">${fmt(c.hwTherm,1)} kWh</strong> of thermal energy. A heat pump at COP ${fmt(S.copHP,1)} draws roughly <strong class="num">${fmt(c.hwHP,1)} kWh</strong> of electricity for this, against about <strong class="num">${fmt(c.hwGeyser,1)} kWh</strong> for an electric geyser.`)}</p>
+<p>${L(
+"सतत मोठ्या प्रमाणात गरम पाण्याची आवश्यकता असल्यास modular heat-pump system ठेवणे अधिक योग्य राहील, जेणेकरून एका युनिटच्या failure मुळे संपूर्ण laundry बंद पडणार नाही.",
+"Where hot-water demand is continuous and large, a modular heat-pump arrangement is preferable so that the failure of one unit does not stop the entire laundry.")}</p>`:""}
+
+${head(S.hwSystem?"7":"6","प्रस्तावित कार्यपद्धती","Proposed process flow")}
+<div class="flow">
+<b>${L("मलिन लिनेन","Soiled linen")}</b> → ${L("Sorting व pre-treatment","Sorting & pre-treatment")} → <b>${c.cap} kg Industrial Washer-Extractor</b> → ${L("हाय-स्पीड यांत्रिक एक्स्ट्रॅक्शन","High-speed mechanical extraction")} → <b>${c.cap} kg Heat-Pump Tumble Dryer</b> → ${L("मॉइश्चर-नियंत्रित ड्रायिंग","Moisture-controlled drying")} → <b>${L("कोरडे लिनेन","Dry linen")}</b> → ${L("फोल्डिंग / इस्त्री","Folding / ironing")} → <b>${L("स्वच्छ लिनेन साठवण व वितरण","Clean linen storage & distribution")}</b>
+${S.hwSystem?`<br><br><b>Heat-Pump Water Heater</b> → ${L("गरम पाणी साठवण टाकी","Hot-water storage tank")} → <b>Washer</b>`:""}
+</div>
+<p>${L("laundry layout मध्ये “soiled/dirty zone” आणि “clean zone” वेगळे ठेवणे संसर्ग-नियंत्रणासाठी अत्यंत महत्त्वाचे आहे.","Separating the soiled zone from the clean zone in the laundry layout is essential for infection control.")}</p>
+
+${head(S.hwSystem?"8":"7","हीट-पंप, इलेक्ट्रिक व गॅस — तुलना","Heat-pump vs electric vs gas")}
+<table><thead><tr><th>${L("बाब","Parameter")}</th><th>${L("इलेक्ट्रिक / गिझर","Electric / geyser")}</th><th>${L("गॅस आधारित","Gas fired")}</th><th>${L("हीट-पंप","Heat pump")}</th></tr></thead><tbody>${cmp}</tbody></table>
+
+${head(S.hwSystem?"9":"8","ऊर्जा व खर्च विश्लेषण","Energy and cost analysis")}
+<p>${L(
+`दैनिक <strong class="num">${fmt(c.daily)} kg</strong> लिनेनमधून एक्स्ट्रॅक्शननंतर <strong class="num">${fmt(c.wPerKg,2)} kg पाणी प्रति kg लिनेन</strong> या दराने सुमारे <strong class="num">${fmt(c.waterDay)} kg पाणी</strong> ड्रायरमध्ये काढावे लागते.`,
+`From <strong class="num">${fmt(c.daily)} kg</strong> of linen per day, at <strong class="num">${fmt(c.wPerKg,2)} kg of water per kg of linen</strong> after extraction, about <strong class="num">${fmt(c.waterDay)} kg of water</strong> must be evaporated in the dryer.`)}</p>
+<table><thead><tr><th>${L("दैनिक ऊर्जा","Daily energy")}</th><th class="n">${L("इलेक्ट्रिक","Electric")}</th><th class="n">${L("गॅस","Gas")}</th><th class="n">${L("हीट-पंप","Heat pump")}</th></tr></thead><tbody>${en}
+<tr class="total"><td>${L("दैनिक खर्च","Daily cost")}</td><td class="n">${rupee(c.sc.el.cost)}</td><td class="n">${rupee(c.sc.gas.cost)}</td><td class="n">${rupee(c.sc.hp.cost)}</td></tr>
+<tr class="total"><td>${L("वार्षिक खर्च","Annual cost")} (${fmt(S.days)} ${L("दिवस","days")})</td><td class="n">${rupee(c.sc.el.yr)}</td><td class="n">${rupee(c.sc.gas.yr)}</td><td class="n">${rupee(c.sc.hp.yr)}</td></tr>
+<tr class="total"><td>${L("वार्षिक CO₂","Annual CO₂")}</td><td class="n">${fmt(c.sc.el.co2Yr,1)} t</td><td class="n">${fmt(c.sc.gas.co2Yr,1)} t</td><td class="n">${fmt(c.sc.hp.co2Yr,1)} t</td></tr>
+</tbody></table>
+<div class="callout"><span class="k">${L("वार्षिक बचत","Annual saving")}</span>
+${L("इलेक्ट्रिक प्रणालीच्या तुलनेत","Against an electric system")} <strong>${rupee(c.saveEl)}/${L("वर्ष","yr")}</strong> · ${L("गॅस प्रणालीच्या तुलनेत","against a gas system")} <strong>${rupee(c.saveGas)}/${L("वर्ष","yr")}</strong> · CO₂ ${L("घट","reduction")} <strong>${fmt(c.sc.el.co2Yr-c.sc.hp.co2Yr,1)} ${L("टन/वर्ष","t/yr")}</strong>
+</div>
+<p class="fine">${L(
+`गृहितके: वीज दर ₹${fmt(S.tariff,2)}/kWh, ${S.gasType==="lpg"?"LPG ₹"+fmt(S.lpgRate)+"/kg":"PNG ₹"+fmt(S.pngRate)+"/SCM"}, heat-pump dryer SEC ${fmt(S.secHP,2)} kWh/kg water, electric dryer SEC ${fmt(S.secEL,2)} kWh/kg water, gas dryer ${fmt(S.secGAS,2)} kWh thermal/kg water, ग्रिड उत्सर्जन ${fmt(S.gridCO2,2)} kg CO₂/kWh.`,
+`Assumptions: electricity ₹${fmt(S.tariff,2)}/kWh, ${S.gasType==="lpg"?"LPG ₹"+fmt(S.lpgRate)+"/kg":"PNG ₹"+fmt(S.pngRate)+"/SCM"}, heat-pump dryer SEC ${fmt(S.secHP,2)} kWh/kg water, electric dryer SEC ${fmt(S.secEL,2)} kWh/kg water, gas dryer ${fmt(S.secGAS,2)} kWh thermal/kg water, grid emission factor ${fmt(S.gridCO2,2)} kg CO₂/kWh.`)}</p>
+
+${head(S.hwSystem?"10":"9","अंदाजे प्रकल्प खर्च","Indicative project cost")}
+<table><thead><tr><th class="n" style="width:8%">${L("क्र.","Sr.")}</th><th>${L("घटक","Component")}</th><th class="n">${L("किमान (लाख)","Low (₹ lakh)")}</th><th class="n">${L("कमाल (लाख)","High (₹ lakh)")}</th></tr></thead><tbody>
+${boqRows}
+<tr><td class="n"></td><td>${L("आकस्मिक निधी","Contingency")} @ ${fmt(S.contingency)}%</td><td class="n">${fmt(c.contL,2)}</td><td class="n">${fmt(c.contH,2)}</td></tr>
+<tr class="total"><td class="n"></td><td>${L("एकूण (GST वगळून)","Sub-total (excl. GST)")}</td><td class="n">${fmt(c.totL,2)}</td><td class="n">${fmt(c.totH,2)}</td></tr>
+${S.gst?`<tr><td class="n"></td><td>GST @ ${fmt(S.gstRate)}%</td><td class="n">${fmt(c.gstL,2)}</td><td class="n">${fmt(c.gstH,2)}</td></tr>
+<tr class="total"><td class="n"></td><td>${L("एकूण अंदाजे प्रकल्प खर्च","Total indicative project cost")}</td><td class="n">${fmt(c.grandL,2)}</td><td class="n">${fmt(c.grandH,2)}</td></tr>`:""}
+</tbody></table>
+<p>${L("५ वर्षांच्या comprehensive AMC साठी अंदाजे","Indicative comprehensive AMC for 5 years")} <strong>${rng(c.amcL,c.amcH)}/${L("वर्ष","yr")}</strong> ${L("(उपकरण किंमतीच्या","(at")} ${fmt(S.amcPct,1)}% ${L("दराने)","of equipment cost per year)")}.</p>
+<p class="fine">${L(
+"टीप: वरील किंमत प्राथमिक budgetary estimate आहे. Civil work, electrical infrastructure, वाहतूक आणि site-specific requirements यानुसार अंतिम किंमत बदलू शकते. अंतिम procurement पूर्वी किमान ३ नामांकित उत्पादकांकडून technical व commercial quotations घेणे उचित राहील.",
+"Note: these are preliminary budgetary estimates. Civil work, electrical infrastructure, transport and site-specific requirements will shift the final figure. Obtain technical and commercial quotations from at least three reputed manufacturers before procurement.")}</p>
+
+${head(S.hwSystem?"11":"10","ROI व पेबॅक","ROI and payback")}
+<p>${L(
+`Heat-pump dryer ची प्रारंभिक किंमत conventional dryer पेक्षा जास्त असते. पारंपरिक ड्रायरची किंमत heat-pump ड्रायरच्या सुमारे ${fmt(S.convFactor)}% गृहीत धरल्यास अतिरिक्त गुंतवणूक सुमारे <strong>${rng(c.premL,c.premH)}</strong> होते${S.hwSystem?` (यामध्ये geyser bank ऐवजी heat-pump water heater निवडल्याचा ${rng(c.premHwL,c.premHwH)} फरक समाविष्ट)`:""}. वार्षिक ऊर्जा बचत <strong>${rupee(c.saveEl)}</strong> (इलेक्ट्रिक तुलनेत) असल्यास:`,
+`A heat-pump dryer costs more up front. Taking a conventional dryer at about ${fmt(S.convFactor)}% of the heat-pump dryer price, the additional investment is roughly <strong>${rng(c.premL,c.premH)}</strong>${S.hwSystem?` (including ${rng(c.premHwL,c.premHwH)} for choosing a heat-pump water heater over a geyser bank)`:""}. Against an annual energy saving of <strong>${rupee(c.saveEl)}</strong> versus electric:`)}</p>
+<table><tbody>
+<tr><td>${L("अतिरिक्त गुंतवणूक (सरासरी)","Additional investment (mid)")}</td><td class="n">${rupee((c.premL+c.premH)/2*100000)}</td></tr>
+<tr><td>${L("पेबॅक — इलेक्ट्रिक तुलनेत","Payback vs electric")}</td><td class="n">${isFinite(c.pbEl)?fmt(c.pbEl,1)+" "+L("वर्षे","years"):"—"}</td></tr>
+<tr><td>${L("पेबॅक — गॅस तुलनेत","Payback vs gas")}</td><td class="n">${isFinite(c.pbGas)?fmt(c.pbGas,1)+" "+L("वर्षे","years"):"—"}</td></tr>
+<tr class="total"><td>${L("१० वर्षांचा जीवनचक्र खर्च — हीट-पंप","10-year life-cycle cost — heat pump")}</td><td class="n">${rupee(c.lc.hp)}</td></tr>
+<tr><td>${L("१० वर्षांचा जीवनचक्र खर्च — इलेक्ट्रिक","10-year life-cycle cost — electric")}</td><td class="n">${rupee(c.lc.el)}</td></tr>
+<tr><td>${L("१० वर्षांचा जीवनचक्र खर्च — गॅस","10-year life-cycle cost — gas")}</td><td class="n">${rupee(c.lc.gas)}</td></tr>
+</tbody></table>
+<p>${L(
+"वास्तविक ROI निश्चित करण्यासाठी प्रत्यक्ष laundry load, operating hours, वीज व गॅस दर आणि supplier ने घोषित केलेले measured SEC यांच्या आधारे techno-economic analysis करणे आवश्यक आहे.",
+"Actual ROI must be established from measured laundry load, operating hours, local electricity and gas tariffs and the supplier's declared and demonstrated SEC.")}</p>
+
+${head(S.hwSystem?"12":"11","Performance Guarantee","Performance guarantee")}
+<p>${L("Supplier ने commissioning वेळी खालील बाबींची प्रत्यक्ष demonstration करणे आवश्यक आहे:","The supplier shall demonstrate the following at commissioning:")}</p>
+<ul>
+<li>${c.cap} kg rated loading</li>
+<li>${L("प्रारंभिक व अंतिम ओलावा (initial / final moisture content)","Initial and final moisture content")}</li>
+<li>${L("Drying time व काढलेले पाणी","Drying time and water removed")}</li>
+<li>${L("एकूण विद्युत ऊर्जा वापर","Total electrical energy consumed")}</li>
+<li><strong>SEC — kWh/kg water removed (${L("target","target")} ≤ 1.0)</strong></li>
+<li>${L("Drying तापमान व तापमान एकसमानता","Drying temperature and uniformity")}</li>
+<li>${L("Automatic moisture control, condensate collection, drum reversal","Automatic moisture control, condensate collection, drum reversal")}</li>
+<li>${L("Safety interlocks व emergency stop","Safety interlocks and emergency stop")}</li>
+${S.hwSystem?`<li>${L("Heat-pump water heater चा measured COP","Measured COP of the heat-pump water heater")}</li>`:""}
+</ul>
+<p class="fine">${L("Bidder ने initial moisture, final moisture, ambient temperature, drying temperature, load composition आणि test methodology स्पष्टपणे नमूद करावी.","The bidder shall state initial moisture, final moisture, ambient temperature, drying temperature, load composition and test methodology explicitly.")}</p>
+
+${head(S.hwSystem?"13":"12","Warranty व AMC","Warranty and AMC")}
+<ul>
+<li>Washer-Extractor — ${L("किमान २ वर्षे comprehensive warranty","minimum 2 years comprehensive warranty")}</li>
+<li>Heat-Pump Dryer — ${L("किमान २ वर्षे comprehensive warranty","minimum 2 years comprehensive warranty")}</li>
+<li>${L("Compressor — किमान ३ वर्षे (preferred)","Compressor — minimum 3 years (preferred)")}</li>
+<li>${L("Heat exchanger — किमान ३ वर्षे (preferred)","Heat exchanger — minimum 3 years (preferred)")}</li>
+<li>${L("Drum — उत्पादन दोषांविरुद्ध किमान ५ वर्षे (preferred)","Drum — minimum 5 years against manufacturing defects (preferred)")}</li>
+<li>${L(S.amcYears+" वर्षांचा comprehensive AMC: preventive maintenance, breakdown service, bearing/seal व VFD inspection, refrigeration system inspection, compressor performance check, temperature/humidity sensor calibration, electrical safety inspection व critical spare support.",S.amcYears+"-year comprehensive AMC: preventive maintenance, breakdown service, bearing/seal and VFD inspection, refrigeration system inspection, compressor performance check, temperature/humidity sensor calibration, electrical safety inspection and critical spare support.")}</li>
+</ul>
+
+${head(S.hwSystem?"14":"13","अंमलबजावणीचे टप्पे","Implementation stages")}
+<div class="flow">
+${L("१. लिनेन ऑडिट","1. Linen audit")} → ${L("२. दैनिक लोड मूल्यांकन","2. Daily load assessment")} → ${L("३. मशीन क्षमता निवड","3. Capacity selection")} → ${L("४. गरम पाणी प्रणाली sizing","4. Hot-water sizing")} → ${L("५. लेआउट व युटिलिटी नियोजन","5. Layout & utility planning")} → ${L("६. निविदा / खरेदी","6. Tender / procurement")} → ${L("७. स्थापना व commissioning","7. Installation & commissioning")} → ${L("८. Performance testing","8. Performance testing")} → ${L("९. ऑपरेटर प्रशिक्षण","9. Operator training")} → ${L("१०. ऊर्जा व कामगिरी संनियंत्रण","10. Energy & performance monitoring")}
+</div>
+
+${head(S.hwSystem?"15":"14","निष्कर्ष","Conclusion")}
+<p>${L(
+`<strong>${c.installedQty} × ${c.cap} kg Industrial Washer-Extractor + ${c.installedQty} × ${c.cap} kg Heat-Pump Tumble Dryer</strong>${S.hwSystem?" + heat-pump गरम पाणी प्रणाली":""} ही प्रणाली ${c.A.mr}साठी तांत्रिकदृष्ट्या योग्य आणि ऊर्जा-कार्यक्षम पर्याय आहे. स्वयंचलित washing, high-speed extraction आणि heat-pump आधारित low-temperature drying यामुळे मनुष्यबळ, पाणी, ऊर्जा आणि processing time मध्ये बचत, तसेच linen hygiene व operational reliability मध्ये सुधारणा अपेक्षित आहे. प्रारंभिक गुंतवणूक conventional प्रणालीपेक्षा जास्त असली तरी वार्षिक सुमारे <strong>${rupee(c.saveEl)}</strong> ऊर्जा बचतीमुळे अंदाजे <strong>${isFinite(c.pbEl)?fmt(c.pbEl,1)+" वर्षांत":"—"}</strong> अतिरिक्त गुंतवणुकीचा payback अपेक्षित आहे. त्यामुळे ही प्रणाली दीर्घकालीन life-cycle cost, ऊर्जा बचत, hygiene, safety व पर्यावरणीय दृष्टिकोनातून आर्थिकदृष्ट्या व्यवहार्य व शाश्वत ठरते.`,
+`A system of <strong>${c.installedQty} × ${c.cap} kg industrial washer-extractors and ${c.installedQty} × ${c.cap} kg heat-pump tumble dryers</strong>${S.hwSystem?", together with a heat-pump hot-water system,":""} is a technically appropriate and energy-efficient choice for this ${c.A.en.toLowerCase()}. Automated washing, high-speed extraction and low-temperature heat-pump drying are expected to save labour, water, energy and processing time while improving linen hygiene and operational reliability. The initial investment exceeds that of a conventional system, but an annual energy saving of about <strong>${rupee(c.saveEl)}</strong> gives an indicative payback of <strong>${isFinite(c.pbEl)?fmt(c.pbEl,1)+" years":"—"}</strong> on the incremental cost. On a life-cycle basis — energy, hygiene, safety and emissions together — the system is financially viable and sustainable.`)}</p>
+<p>${L("वरील प्रस्तावास मान्यता मिळावी, ही विनंती.","Your approval of this proposal is respectfully requested.")}</p>
+<div class="sign"><div><div class="line"></div>${L("प्रस्तावक / सक्षम अधिकारी","Proposed by / competent authority")}</div></div>`;
+}
+
+/* ---------- BOQ view ---------- */
+function viewBOQ(c){
+  const rows=c.lines.map((x,i)=>{
+    const mid=(x.l+x.h)/2;
+    return `<tr><td class="n">${i+1}</td><td>${x[S.lang]||x.mr}</td><td>${x.spec}</td><td class="n">${x.qtyTxt}</td><td class="n">${fmt(x.l,2)}</td><td class="n">${fmt(x.h,2)}</td><td class="n">${fmt(mid,2)}</td></tr>`;
+  }).join("");
+  const mid=(a,b)=>(a+b)/2;
+  const payment=[
+    [L("पुरवठा आदेशासोबत अग्रिम","Advance with purchase order"),"10%"],
+    [L("साहित्य साइटवर पोहोचल्यावर","On delivery of material at site"),"60%"],
+    [L("स्थापना पूर्ण झाल्यावर","On completion of installation"),"15%"],
+    [L("Performance test व commissioning नंतर","After performance test and commissioning"),"10%"],
+    [L("प्रशिक्षण व दस्तऐवज सुपूर्द केल्यावर","After training and handover of documentation"),"5%"]
+  ].map(r=>`<tr><td>${r[0]}</td><td class="n">${r[1]}</td></tr>`).join("");
+
+  return docHeader(c)+`
+${head("A","सविस्तर बिल ऑफ क्वांटिटीज (BOQ)","Detailed bill of quantities")}
+<table><thead><tr>
+<th class="n" style="width:6%">${L("क्र.","Sr.")}</th><th>${L("घटक","Item")}</th><th>${L("तपशील","Specification")}</th><th class="n">${L("संख्या","Qty")}</th>
+<th class="n">${L("किमान","Low")}</th><th class="n">${L("कमाल","High")}</th><th class="n">${L("सरासरी","Mid")}</th></tr></thead>
+<tbody>${rows}
+<tr><td class="n"></td><td colspan="3">${L("उप-बेरीज","Sub-total")}</td><td class="n">${fmt(c.subL,2)}</td><td class="n">${fmt(c.subH,2)}</td><td class="n">${fmt(mid(c.subL,c.subH),2)}</td></tr>
+<tr><td class="n"></td><td colspan="3">${L("आकस्मिक निधी","Contingency")} @ ${fmt(S.contingency)}%</td><td class="n">${fmt(c.contL,2)}</td><td class="n">${fmt(c.contH,2)}</td><td class="n">${fmt(mid(c.contL,c.contH),2)}</td></tr>
+<tr class="total"><td class="n"></td><td colspan="3">${L("एकूण (GST वगळून)","Total excl. GST")}</td><td class="n">${fmt(c.totL,2)}</td><td class="n">${fmt(c.totH,2)}</td><td class="n">${fmt(mid(c.totL,c.totH),2)}</td></tr>
+${S.gst?`<tr><td class="n"></td><td colspan="3">GST @ ${fmt(S.gstRate)}%</td><td class="n">${fmt(c.gstL,2)}</td><td class="n">${fmt(c.gstH,2)}</td><td class="n">${fmt(mid(c.gstL,c.gstH),2)}</td></tr>
+<tr class="total"><td class="n"></td><td colspan="3">${L("एकूण प्रकल्प खर्च","Grand total")}</td><td class="n">${fmt(c.grandL,2)}</td><td class="n">${fmt(c.grandH,2)}</td><td class="n">${fmt(mid(c.grandL,c.grandH),2)}</td></tr>`:""}
+</tbody></table>
+<p class="fine">${L("सर्व रकमा ₹ लाखांमध्ये. दर सन २०२६ च्या प्राथमिक budgetary अंदाजांवर आधारित; अंतिम दर OEM कोटेशन व निविदा प्रक्रियेनुसार निश्चित होतील.","All amounts in ₹ lakh. Rates are indicative 2026 budgetary estimates; final rates will follow OEM quotations and the tender process.")}</p>
+
+${head("B","वार्षिक परिचालन खर्च","Annual operating cost")}
+<table><thead><tr><th>${L("बाब","Item")}</th><th class="n">${L("प्रति दिन","Per day")}</th><th class="n">${L("प्रति वर्ष","Per year")}</th></tr></thead><tbody>
+<tr><td>${L("वीज वापर","Electricity consumption")}</td><td class="n">${fmt(c.sc.hp.kwh,1)} kWh</td><td class="n">${fmt(c.sc.hp.kwhYr)} kWh</td></tr>
+<tr><td>${L("ऊर्जा खर्च","Energy cost")}</td><td class="n">${rupee(c.sc.hp.cost)}</td><td class="n">${rupee(c.sc.hp.yr)}</td></tr>
+<tr><td>${L("प्रति kg लिनेन ऊर्जा खर्च","Energy cost per kg linen")}</td><td class="n">₹${fmt(c.sc.hp.perKg,2)}</td><td class="n">—</td></tr>
+<tr><td>${L("AMC (सरासरी)","AMC (mid)")}</td><td class="n">—</td><td class="n">${rupee(mid(c.amcL,c.amcH)*100000)}</td></tr>
+<tr class="total"><td>${L("एकूण वार्षिक परिचालन खर्च","Total annual operating cost")}</td><td class="n">—</td><td class="n">${rupee(c.sc.hp.yr+mid(c.amcL,c.amcH)*100000)}</td></tr>
+</tbody></table>
+<p>${L("तुलनेसाठी इलेक्ट्रिक प्रणालीचा वार्षिक ऊर्जा खर्च","For comparison, annual energy cost of an electric system")} <strong>${rupee(c.sc.el.yr)}</strong>, ${L("गॅस प्रणालीचा","of a gas system")} <strong>${rupee(c.sc.gas.yr)}</strong>.</p>
+
+${head("C","देयक अटी (सूचित)","Suggested payment terms")}
+<table><thead><tr><th>${L("टप्पा","Milestone")}</th><th class="n">${L("देयक","Payment")}</th></tr></thead><tbody>${payment}</tbody></table>
+<p class="fine">${L("Performance Bank Guarantee: करार मूल्याच्या ५–१०%, warranty कालावधीपर्यंत वैध. वितरण कालावधी: पुरवठा आदेशापासून १०–१४ आठवडे (सूचित).","Performance bank guarantee: 5–10% of contract value, valid through the warranty period. Delivery: 10–14 weeks from purchase order (suggested).")}</p>
+
+${head("D","गृहितकांची नोंद","Record of assumptions")}
+<table><tbody>
+<tr><td>${L("दैनिक लिनेन लोड","Daily linen load")}</td><td class="n">${fmt(c.daily)} kg</td></tr>
+<tr><td>${L("प्रभावी सायकल / दिवस","Effective cycles per day")}</td><td class="n">${fmt(S.cycles)}</td></tr>
+<tr><td>${L("कार्यकाल","Operating hours")}</td><td class="n">${fmt(S.hours)} h</td></tr>
+<tr><td>${L("कार्यरत दिवस / वर्ष","Working days per year")}</td><td class="n">${fmt(S.days)}</td></tr>
+<tr><td>${L("एक्स्ट्रॅक्शननंतर ओलावा","Moisture after extraction")}</td><td class="n">${fmt(S.rmrIn)} %</td></tr>
+<tr><td>${L("अंतिम ओलावा","Final moisture")}</td><td class="n">${fmt(S.rmrOut)} %</td></tr>
+<tr><td>${L("काढले जाणारे पाणी","Water removed")}</td><td class="n">${fmt(c.waterDay)} kg/${L("दिन","day")}</td></tr>
+<tr><td>Heat-pump dryer SEC</td><td class="n">${fmt(S.secHP,2)} kWh/kg</td></tr>
+<tr><td>Electric dryer SEC</td><td class="n">${fmt(S.secEL,2)} kWh/kg</td></tr>
+<tr><td>Gas dryer SEC (thermal)</td><td class="n">${fmt(S.secGAS,2)} kWh/kg</td></tr>
+${S.hwSystem?`<tr><td>${L("गरम पाणी","Hot water")}</td><td class="n">${fmt(c.hwLitres)} L @ ${S.tHot}°C</td></tr>
+<tr><td>${L("हीट-पंप वॉटर हीटर COP","Heat-pump water heater COP")}</td><td class="n">${fmt(S.copHP,1)}</td></tr>`:""}
+<tr><td>${L("वीज दर","Electricity tariff")}</td><td class="n">₹${fmt(S.tariff,2)}/kWh</td></tr>
+<tr><td>${L("इंधन दर","Fuel rate")}</td><td class="n">${S.gasType==="lpg"?"₹"+fmt(S.lpgRate)+"/kg LPG":"₹"+fmt(S.pngRate)+"/SCM PNG"}</td></tr>
+<tr><td>${L("अंदाजित जोडलेला भार","Estimated connected load")}</td><td class="n">~${fmt(c.connLoad)} kW</td></tr>
+</tbody></table>`;
+}
+
+/* ---------- Tender specification view ---------- */
+function viewTech(c){
+  const cap=c.cap;
+  const wash=[
+    ["Rated capacity",`<strong>${cap} kg dry linen / cycle</strong>`],
+    ["Type","Industrial washer-extractor, fully automatic"],
+    ["Loading","Front loading"],
+    ["Washing principle","Tumble washing"],
+    ["Drum / wetted parts","SS304 minimum"],
+    ["Drum volume",`Approx. ${fmt(cap*10)}–${fmt(cap*11)} L, as per OEM design`],
+    ["Power supply","415 V, 3-phase, 50 Hz"],
+    ["Drive","VFD controlled"],
+    ["Wash speed","Approx. 25–35 rpm, programmable"],
+    ["High extraction speed","≥700 rpm preferred"],
+    ["G-factor","≥250 preferred"],
+    ["Programmes","Minimum 10 programmable"],
+    ["Chemical dosing","Minimum 6 channels, automatic"],
+    ["Control","PLC + touchscreen HMI"],
+    ["Door","Front-opening, heavy duty, interlocked"],
+    ["Imbalance detection","Mandatory"],
+    ["Drum reversal","Automatic"],
+    ["Water inlet","Separate hot and cold inlets"],
+    ["Data logging","Preferred"]
+  ];
+  const dry=[
+    ["Rated capacity",`<strong>${cap} kg dry textile / load</strong>`],
+    ["Technology","<strong>Air-source heat pump, closed loop</strong>"],
+    ["Drying system","Re-circulating air with heat recovery"],
+    ["Loading","Front loading"],
+    ["Drum","SS304 / corrosion resistant"],
+    ["Drum volume",`Approx. ${fmt(cap*18)}–${fmt(cap*22)} L, as per OEM design`],
+    ["Drying temperature","40–80°C adjustable"],
+    ["Normal operating range","50–70°C"],
+    ["Control","PLC + touchscreen"],
+    ["Temperature sensing","Mandatory"],
+    ["Humidity / moisture sensing","<strong>Mandatory</strong>"],
+    ["Drum reversal","Automatic"],
+    ["Lint filter","Large-area removable / washable"],
+    ["Condensate","Automatic drainage"],
+    ["Compressor","High efficiency, scroll or equivalent"],
+    ["Refrigerant","Low-GWP refrigerant preferred"],
+    ["Power supply","415 V, 3-phase, 50 Hz"],
+    ["Safety","HP/LP cut-outs, overload and over-temperature protection"],
+    ["Specific energy consumption",`<strong>≤1.0 kWh / kg water removed</strong> (declared value to be proven on site)`],
+    ["Data logging / remote monitoring","Preferred"]
+  ];
+  const hw=[
+    ["Type","Air-source heat-pump water heater"],
+    ["Rated output temperature",`${S.tHot}°C`],
+    ["Daily hot-water output",`${fmt(Math.ceil(c.hwLitres/50)*50)} LPD minimum`],
+    ["COP",`≥${fmt(S.copHP,1)} at ambient 25°C, rated conditions`],
+    ["Storage tank",`${fmt(Math.ceil(c.hwLitres*0.8/100)*100)} L, insulated, SS`],
+    ["Configuration","Modular, multi-unit preferred for redundancy"],
+    ["Controls","Thermostatic control with timer and legionella cycle"],
+    ["Backup","Electrical backup heater with interlock"]
+  ];
+  const t=rows=>`<table><thead><tr><th style="width:38%">Parameter</th><th>Recommended specification</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</tbody></table>`;
+
+  const progs=["Cotton","Bed linen","Towels","Blankets","Uniforms","Synthetic fabrics","Delicate fabrics",
+    "Heavily soiled linen","Institutional / hospital linen","Quick wash","Rinse only","Extraction only"];
+
+  return docHeader(c)+`
+${head("A","Washer-Extractor — निविदा विशिष्टता","Washer-extractor — tender specification")}
+${t(wash)}
+<h3>${L("आवश्यक programmable cycles","Required programmable cycles")}</h3>
+<ul>${progs.map(p=>`<li>${p}</li>`).join("")}</ul>
+<p class="fine">${L("प्रत्येक programme मध्ये water level, temperature, washing time, drum speed, chemical dosage, rinses ची संख्या आणि extraction speed programmable असावी.","Each programme shall allow water level, temperature, wash time, drum speed, chemical dosage, number of rinses and extraction speed to be programmed.")}</p>
+
+${head("B","Heat-Pump Tumble Dryer — निविदा विशिष्टता","Heat-pump tumble dryer — tender specification")}
+${t(dry)}
+<div class="callout"><span class="k">${L("मूल्यमापन निकष","Evaluation criterion")}</span>${L(
+"Dryer चे मूल्यमापन compressor kW वर न करता measured SEC (kWh प्रति kg काढलेले पाणी) वर करावे. Bidder ने घोषित SEC, test conditions व test methodology निविदेसोबत सादर करावी आणि commissioning वेळी site वर सिद्ध करावी.",
+"Evaluate the dryer on measured SEC (kWh per kg of water removed), not on compressor kW. The bidder shall submit the declared SEC with test conditions and methodology, and prove it on site at commissioning.")}</div>
+
+${S.hwSystem?`${head("C","गरम पाणी प्रणाली — निविदा विशिष्टता","Hot-water system — tender specification")}
+${t(hw)}`:""}
+
+${head(S.hwSystem?"D":"C","रुग्णालयीन स्वच्छता व सुरक्षा आवश्यकता","Hygiene and safety requirements")}
+<ul>
+<li>${L("SS304 wetted parts","SS304 wetted parts")}</li>
+<li>${L("Programmable disinfection / thermal wash cycles","Programmable disinfection / thermal wash cycles")}</li>
+<li>${L("Hot-water washing capability","Hot-water washing capability")}</li>
+<li>${L("Automatic chemical dosing व temperature monitoring","Automatic chemical dosing and temperature monitoring")}</li>
+<li>${L("Door safety interlock व emergency stop","Door safety interlock and emergency stop")}</li>
+<li>${L("Imbalance protection","Imbalance protection")}</li>
+<li>${L("मलिन व स्वच्छ लिनेनचा वेगळा प्रवाह (dirty / clean zone separation)","Separate soiled and clean linen flow — dirty / clean zone separation")}</li>
+<li>${L("सहज स्वच्छ करता येणारे machine surfaces व lint management","Easy-to-clean machine surfaces and lint management")}</li>
+<li>${L("संपूर्ण cycle records / data logging","Complete cycle records / data logging")}</li>
+</ul>
+
+${head(S.hwSystem?"E":"D","पात्रता निकष (सूचित)","Suggested qualification criteria")}
+<ul>
+<li>${L("उत्पादकाचा किमान ५ वर्षांचा औद्योगिक लॉन्ड्री उपकरण निर्मिती/पुरवठा अनुभव.","Minimum 5 years' experience in manufacturing or supplying industrial laundry equipment.")}</li>
+<li>${L("किमान ३ समकक्ष क्षमतेच्या संस्थात्मक प्रतिष्ठापनांचे संदर्भ (performance certificate सह).","At least three reference installations of comparable capacity, with performance certificates.")}</li>
+<li>${L("ISO 9001 प्रमाणन; उपकरणासाठी CE / BIS अनुरूपता.","ISO 9001 certification; CE / BIS conformity for the equipment.")}</li>
+<li>${L("राज्यात अधिकृत सेवा केंद्र व ४८ तासांत breakdown प्रतिसाद हमी.","Authorised service centre in the state with a guaranteed 48-hour breakdown response.")}</li>
+<li>${L("किमान ७ वर्षे सुटे भाग उपलब्धतेची हमी.","Written assurance of spare-parts availability for at least 7 years.")}</li>
+</ul>`;
+}
+
+/* ============================================================
+   RENDER + EXPORTS + INIT
+   ============================================================ */
+function render(){
+  const c=compute();
+  updateLedger(c);
+  const paper=$("paper");
+  paper.className="paper"+(S.lang==="en"?" en":"");
+  paper.innerHTML = S.view==="boq" ? viewBOQ(c) : S.view==="tech" ? viewTech(c) : viewProposal(c);
+}
+
+function exportWord(){
+  const c=compute();
+  const style=`<style>
+  body{font-family:'Nirmala UI','Mangal',Calibri,sans-serif;font-size:11pt;line-height:1.5;color:#111}
+  h1{font-size:16pt;margin:0 0 4pt}h2{font-size:12.5pt;border-bottom:1.2pt solid #111;padding-bottom:3pt;margin:16pt 0 6pt}
+  h3{font-size:11.5pt;margin:12pt 0 4pt}
+  table{border-collapse:collapse;width:100%;font-size:9.5pt;margin:8pt 0 12pt}
+  th,td{border:0.75pt solid #999;padding:4pt 6pt;text-align:left;vertical-align:top}
+  th{background:#E8E8E4;font-weight:bold}
+  td.n,th.n{text-align:right}
+  tr.total td{background:#E8E8E4;font-weight:bold}
+  .no{color:#0B7A6E;font-weight:bold;margin-right:6pt}
+  .callout{background:#EEF2EE;border-left:3pt solid #0B7A6E;padding:8pt 10pt;margin:8pt 0}
+  .flow{background:#F0F0EC;border:0.75pt solid #CCC;padding:8pt 10pt;margin:8pt 0;font-size:10pt;line-height:1.9}
+  .fine{font-size:9pt;color:#555}.docmeta{font-size:8.5pt;color:#555;border-top:0.75pt solid #BBB;border-bottom:0.75pt solid #BBB;padding:4pt 0;margin:10pt 0 16pt}
+  .docmeta span{margin-right:18pt}.sign{margin-top:36pt;text-align:right}.sign .line{border-top:0.75pt solid #111;width:200pt;display:inline-block}
+  </style>`;
+  const body = S.view==="boq"?viewBOQ(c):S.view==="tech"?viewTech(c):viewProposal(c);
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'
+  xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'>${style}</head><body>${body}</body></html>`;
+  download(new Blob(["\ufeff"+html],{type:"application/msword"}), fileStem()+".doc");
+}
+
+function exportCsv(){
+  const c=compute();
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[
+    ["Laundry system BOQ — indicative budgetary estimate"],
+    ["Institution",S.org||"—"],["Location",S.place||"—"],["Application",APPS[S.app].en],
+    ["Reference",S.refno||"—"],["Date",S.date],
+    ["Daily linen load (kg/day)",round(c.daily,1)],
+    ["Configuration",c.installedQty+" x "+c.cap+" kg washer-extractor + heat-pump dryer"],
+    [],
+    ["Sr.","Item","Specification","Qty","Low (Rs lakh)","High (Rs lakh)","Mid (Rs lakh)"]
+  ];
+  c.lines.forEach((x,i)=>rows.push([i+1,x.en||x.mr,x.spec,x.qtyTxt,round(x.l,2),round(x.h,2),round((x.l+x.h)/2,2)]));
+  rows.push([],["","Sub-total","","",round(c.subL,2),round(c.subH,2),round((c.subL+c.subH)/2,2)]);
+  rows.push(["","Contingency "+S.contingency+"%","","",round(c.contL,2),round(c.contH,2),round((c.contL+c.contH)/2,2)]);
+  rows.push(["","Total excl. GST","","",round(c.totL,2),round(c.totH,2),round((c.totL+c.totH)/2,2)]);
+  if(S.gst){
+    rows.push(["","GST "+S.gstRate+"%","","",round(c.gstL,2),round(c.gstH,2),round((c.gstL+c.gstH)/2,2)]);
+    rows.push(["","Grand total","","",round(c.grandL,2),round(c.grandH,2),round((c.grandL+c.grandH)/2,2)]);
+  }
+  rows.push([],["Annual energy cost — heat pump (Rs)",round(c.sc.hp.yr)]);
+  rows.push(["Annual energy cost — electric (Rs)",round(c.sc.el.yr)]);
+  rows.push(["Annual energy cost — gas (Rs)",round(c.sc.gas.yr)]);
+  rows.push(["Annual saving vs electric (Rs)",round(c.saveEl)]);
+  rows.push(["Annual saving vs gas (Rs)",round(c.saveGas)]);
+  rows.push(["Payback vs electric (years)",isFinite(c.pbEl)?round(c.pbEl,2):"n/a"]);
+  rows.push(["Annual CO2 reduction (tonnes)",round(c.sc.el.co2Yr-c.sc.hp.co2Yr,2)]);
+  download(new Blob(["\ufeff"+rows.map(r=>r.map(q).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"}), fileStem("boq")+"-BOQ.csv");
+}
+
+function fileStem(view){
+  const v=view||S.view;
+  const base=(S.org||"laundry-proposal").replace(/[^\w\u0900-\u097F -]/g,"").trim().replace(/\s+/g,"-");
+  return base+"-"+v+"-"+S.date;
+}
+function download(blob,name){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+}
+function saveProject(){
+  download(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}), fileStem()+".json");
+}
+function loadProject(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      Object.keys(d).forEach(k=>{ if(k in S) S[k]= (k==="rc") ? Object.assign({},S.rc,d.rc) : d[k]; });
+      buildConsole(); syncTabs(); render();
+    }catch(err){ alert(L("फाइल वाचता आली नाही. वैध प्रोजेक्ट JSON फाइल निवडा.","Could not read that file. Choose a valid project JSON file.")); }
+  };
+  r.readAsText(f);
+  e.target.value="";
+}
+
+/* ---------- tabs ---------- */
+function syncTabs(){
+  document.querySelectorAll("#langTabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.lang===S.lang));
+  document.querySelectorAll("#viewTabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===S.view));
+  document.documentElement.lang=S.lang;
+}
+document.querySelectorAll("#langTabs button").forEach(b=>b.addEventListener("click",()=>{
+  S.lang=b.dataset.lang; syncTabs(); buildConsole(); render();
+}));
+document.querySelectorAll("#viewTabs button").forEach(b=>b.addEventListener("click",()=>{
+  S.view=b.dataset.view; syncTabs(); render();
+}));
+$("mtCfg").addEventListener("click",()=>{document.body.className="view-cfg";$("mtCfg").setAttribute("aria-pressed","true");$("mtDoc").setAttribute("aria-pressed","false");});
+$("mtDoc").addEventListener("click",()=>{document.body.className="view-doc";$("mtDoc").setAttribute("aria-pressed","true");$("mtCfg").setAttribute("aria-pressed","false");});
+
+/* ---------- init ---------- */
+buildConsole();
+syncTabs();
+render();
+</script>
+</body>
+</html>
